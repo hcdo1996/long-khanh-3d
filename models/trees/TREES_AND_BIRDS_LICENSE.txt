@@ -1,0 +1,11 @@
+# Trees and small bird
+Creator: Quaternius. License on source model pages: CC0 1.0.
+https://creativecommons.org/publicdomain/zero/1.0/
+Individual sources are in models/manifest.json. Included GLB files are unchanged.
+
+# Dove: attribution required
+"Dove" by Poly by Google, https://poly.pizza/m/2jmH3trzPFf
+CC BY 3.0: https://creativecommons.org/licenses/by/3.0/
+Model included unchanged. Preserve this credit in the app credits; describe future modifications there.
+
+Both bird meshes are static, with no baked animations. Source preview images illustrate the model appearances.

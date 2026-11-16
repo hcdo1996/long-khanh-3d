@@ -1,0 +1,8 @@
+# T-54 base model: NONCOMMERCIAL
+Original creator: m_bergman (Marco Bergman).
+Original source: https://www.thingiverse.com/thing:4718232
+Distribution/conversion source: Kevin-Liu-01/Claude-of-Tanks, commit 255aff4087401f9a4297ef407c21e85ab7ec0728.
+Exact downloaded GLB URL is in models/manifest.json. This bundle retains that GLB unchanged.
+The repository attribution identifies this asset as CC BY-NC-SA 4.0. Attribution, noncommercial use and share-alike conditions apply. License: https://creativecommons.org/licenses/by-nc-sa/4.0/
+Source attribution snapshot: tank_distribution_attribution.md. The original Thingiverse page could not be opened in this session; the license provenance relies on the distributing repository's explicit attribution. Do not imply that this file is CC0 or broadly cleared for commercial use. Any future commercial use needs a differently licensed replacement or permission.
+This is not an exact scan of display tank 714. Geometry, scale, markings and details must be checked against photos. The bundle's T-54 preview is an illustrative render with temporary olive material, not a photograph or a modified replacement GLB.

@@ -1,0 +1,162 @@
+[
+  {
+    "file": "models/men/mQnGoME1ez.glb",
+    "source": "https://poly.pizza/m/mQnGoME1ez",
+    "creator": "Quaternius",
+    "license": "CC0-1.0",
+    "animations": [
+      "HumanArmature|Man_Clapping",
+      "HumanArmature|Man_Death",
+      "HumanArmature|Man_Idle",
+      "HumanArmature|Man_Jump",
+      "HumanArmature|Man_Punch",
+      "HumanArmature|Man_Run",
+      "HumanArmature|Man_RunningJump",
+      "HumanArmature|Man_Sitting",
+      "HumanArmature|Man_Standing",
+      "HumanArmature|Man_SwordSlash",
+      "HumanArmature|Man_Walk"
+    ],
+    "mesh_count": 1
+  },
+  {
+    "file": "models/men/HMnuH5geEG.glb",
+    "source": "https://poly.pizza/m/HMnuH5geEG",
+    "creator": "Quaternius",
+    "license": "CC0-1.0",
+    "animations": [
+      "HumanArmature|Man_Clapping",
+      "HumanArmature|Man_Death",
+      "HumanArmature|Man_Idle",
+      "HumanArmature|Man_Jump",
+      "HumanArmature|Man_Punch",
+      "HumanArmature|Man_Run",
+      "HumanArmature|Man_RunningJump",
+      "HumanArmature|Man_Sitting",
+      "HumanArmature|Man_Standing",
+      "HumanArmature|Man_SwordSlash",
+      "HumanArmature|Man_Walk"
+    ],
+    "mesh_count": 1
+  },
+  {
+    "file": "models/men/fjHyMd5Wxw.glb",
+    "source": "https://poly.pizza/m/fjHyMd5Wxw",
+    "creator": "Quaternius",
+    "license": "CC0-1.0",
+    "animations": [
+      "HumanArmature|Man_Clapping",
+      "HumanArmature|Man_Death",
+      "HumanArmature|Man_Idle",
+      "HumanArmature|Man_Jump",
+      "HumanArmature|Man_Punch",
+      "HumanArmature|Man_Run",
+      "HumanArmature|Man_RunningJump",
+      "HumanArmature|Man_Sitting",
+      "HumanArmature|Man_Standing",
+      "HumanArmature|Man_SwordSlash",
+      "HumanArmature|Man_Walk"
+    ],
+    "mesh_count": 1
+  },
+  {
+    "file": "models/men/DLptRuewTn.glb",
+    "source": "https://poly.pizza/m/DLptRuewTn",
+    "creator": "Quaternius",
+    "license": "CC0-1.0",
+    "animations": [
+      "HumanArmature|Man_Clapping",
+      "HumanArmature|Man_Death",
+      "HumanArmature|Man_Idle",
+      "HumanArmature|Man_Jump",
+      "HumanArmature|Man_Punch",
+      "HumanArmature|Man_Run",
+      "HumanArmature|Man_RunningJump",
+      "HumanArmature|Man_Sitting",
+      "HumanArmature|Man_Standing",
+      "HumanArmature|Man_SwordSlash",
+      "HumanArmature|Man_Walk"
+    ],
+    "mesh_count": 1
+  },
+  {
+    "file": "models/women/jpKRgGDxhk.glb",
+    "source": "https://poly.pizza/m/jpKRgGDxhk",
+    "creator": "Quaternius",
+    "license": "CC0-1.0",
+    "animations": [
+      "HumanArmature|Female_Clapping",
+      "HumanArmature|Female_Death",
+      "HumanArmature|Female_Idle",
+      "HumanArmature|Female_Jump",
+      "HumanArmature|Female_Punch",
+      "HumanArmature|Female_Run",
+      "HumanArmature|Female_RunningJump",
+      "HumanArmature|Female_Sitting",
+      "HumanArmature|Female_Standing",
+      "HumanArmature|Female_SwordSlash",
+      "HumanArmature|Female_Walk"
+    ],
+    "mesh_count": 1
+  },
+  {
+    "file": "models/women/AQsd9ngvKU.glb",
+    "source": "https://poly.pizza/m/AQsd9ngvKU",
+    "creator": "Quaternius",
+    "license": "CC0-1.0",
+    "animations": [
+      "HumanArmature|Female_Clapping",
+      "HumanArmature|Female_Death",
+      "HumanArmature|Female_Idle",
+      "HumanArmature|Female_Jump",
+      "HumanArmature|Female_Punch",
+      "HumanArmature|Female_Run",
+      "HumanArmature|Female_RunningJump",
+      "HumanArmature|Female_Sitting",
+      "HumanArmature|Female_Standing",
+      "HumanArmature|Female_SwordSlash",
+      "HumanArmature|Female_Walk"
+    ],
+    "mesh_count": 1
+  },
+  {
+    "file": "models/women/XqzeZGB7iU.glb",
+    "source": "https://poly.pizza/m/XqzeZGB7iU",
+    "creator": "Quaternius",
+    "license": "CC0-1.0",
+    "animations": [
+      "HumanArmature|Female_Clapping",
+      "HumanArmature|Female_Death",
+      "HumanArmature|Female_Idle",
+      "HumanArmature|Female_Jump",
+      "HumanArmature|Female_Punch",
+      "HumanArmature|Female_Run",
+      "HumanArmature|Female_RunningJump",
+      "HumanArmature|Female_Sitting",
+      "HumanArmature|Female_Standing",
+      "HumanArmature|Female_SwordSlash",
+      "HumanArmature|Female_Walk"
+    ],
+    "mesh_count": 1
+  },
+  {
+    "file": "models/women/zMyPlQXBzq.glb",
+    "source": "https://poly.pizza/m/zMyPlQXBzq",
+    "creator": "Quaternius",
+    "license": "CC0-1.0",
+    "animations": [
+      "HumanArmature|Female_Clapping",
+      "HumanArmature|Female_Death",
+      "HumanArmature|Female_Idle",
+      "HumanArmature|Female_Jump",
+      "HumanArmature|Female_Punch",
+      "HumanArmature|Female_Run",
+      "HumanArmature|Female_RunningJump",
+      "HumanArmature|Female_Sitting",
+      "HumanArmature|Female_Standing",
+      "HumanArmature|Female_SwordSlash",
+      "HumanArmature|Female_Walk"
+    ],
+    "mesh_count": 1
+  }
+]

@@ -1,0 +1,16 @@
+# Downloaded skies
+Poly Haven HDRIs, CC0 1.0: https://creativecommons.org/publicdomain/zero/1.0/
+Source pages and original checksum values are in manifest.json. HDR files are unchanged.
+
+# Downloaded motor scooters — attribution required
+- "Scooter" by Poly by Google: https://poly.pizza/m/eHdEFPwUfCt
+- "low poly scooter" by Thomas Saint Pierre (s1pierro): https://poly.pizza/m/awXCP7LUcz6
+- "Scooter" by MiniPoly: https://poly.pizza/m/3vLV1QtLFP
+All three: CC BY 3.0, https://creativecommons.org/licenses/by/3.0/
+GLBs included unchanged. Preserve creator credit and source/license links in project credits. Describe any later modifications.
+
+# Original building models and code
+The four shophouse models and their Python source were generated for this task. They are original stylized approximations, not downloaded third-party models or surveyed buildings. They do not inherit the licenses of the models linked in MORE_MODEL_DOWNLOADS.md. No additional attribution requirement is imposed here. Fake shop signs are generic labels, not endorsements of real businesses.
+
+# External model links
+Linked Sketchfab files are not redistributed here; their creators' respective licenses apply if downloaded later. Do not confuse these links with the included original building models.

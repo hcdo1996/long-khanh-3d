@@ -1,0 +1,18 @@
+# People models
+Creator: Quaternius. Animated Men and Animated Women packs.
+License: CC0 1.0, https://creativecommons.org/publicdomain/zero/1.0/
+Original sources:
+https://quaternius.com/packs/animatedmen.html
+https://quaternius.com/packs/animatedwomen.html
+Download mirrors:
+https://poly.pizza/bundle/Animated-Men-Pack-DAC9SDgMQT
+https://poly.pizza/bundle/Animated-Women-Pack-HHSKxnk1mY
+Individual model provenance is in models/manifest.json.
+
+# Reference photos
+Publisher photo rights remain with their respective owners. These images are reference material for inspecting the monument; do not incorporate them into public scene textures or redistribute them as your own. See references/sources.json for exact sources and captions.
+JPEG copies of AVIF source photos retain the source resolution; no AI upscaling or invented details were used.
+The user's screenshot is labelled separately and must not be mistaken for a real photograph.
+
+# Scope
+The original Google Drive downloads returned a download-quota error. The included assets are the eight animated men/women models available from the CC0 mirror. The separate static posed-human pack and Renderpeople samples are not included. No cars are included.

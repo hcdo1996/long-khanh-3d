@@ -1,0 +1,82 @@
+[
+  {
+    "file": "skies/kloppenheim_03_puresky_4k.hdr",
+    "source": "https://polyhaven.com/a/kloppenheim_03_puresky",
+    "creator": "Poly Haven contributors",
+    "license": "CC0-1.0",
+    "resolution": "4k",
+    "md5": "09c9e57a51e6eed81ac70e194d58eab2",
+    "sha256": "f906a7334e5d57007fa5516bd141df2ada8fdc3d2ba0c8bdf445d64f1bbb010a"
+  },
+  {
+    "file": "skies/industrial_sunset_puresky_2k.hdr",
+    "source": "https://polyhaven.com/a/industrial_sunset_puresky",
+    "creator": "Poly Haven contributors",
+    "license": "CC0-1.0",
+    "resolution": "2k",
+    "md5": "54457ed6fc7e0dcd7fcdcd0603892a7d",
+    "sha256": "799e6fa9a58dfbec1426d62486aa87fa097a85cf16bb121c79f9ee1125a54288"
+  },
+  {
+    "file": "skies/kloppenheim_01_puresky_2k.hdr",
+    "source": "https://polyhaven.com/a/kloppenheim_01_puresky",
+    "creator": "Poly Haven contributors",
+    "license": "CC0-1.0",
+    "resolution": "2k",
+    "md5": "6b67f5415b20db8649d68e238a376a8c",
+    "sha256": "93ca2257ab8e20f71c1ae4680b015e6748af27c909bd3228fb7cd0fdd369611e"
+  },
+  {
+    "file": "models/scooters/scooter_google.glb",
+    "source": "https://poly.pizza/m/eHdEFPwUfCt",
+    "creator": "Poly by Google",
+    "license": "CC-BY-3.0",
+    "sha256": "f35f1882f2751561fcbb965f5b517c6fb5c1aeb915d90995fb8d07e8750d56f9"
+  },
+  {
+    "file": "models/scooters/scooter_s1pierro.glb",
+    "source": "https://poly.pizza/m/awXCP7LUcz6",
+    "creator": "Thomas Saint Pierre (s1pierro)",
+    "license": "CC-BY-3.0",
+    "sha256": "9edb60f3d315407ee110022c7ee3b644080db5d2beb42491da099b2b081c1b61"
+  },
+  {
+    "file": "models/scooters/scooter_minipoly.glb",
+    "source": "https://poly.pizza/m/3vLV1QtLFP",
+    "creator": "MiniPoly",
+    "license": "CC-BY-3.0",
+    "sha256": "567b0023a08729bfa00003b8da48c3964bbb071eb3241818f38096e7d9964813"
+  },
+  {
+    "file": "models/buildings/blue_townhouse.glb",
+    "origin": "original model generated for this task, not a downloaded or surveyed building",
+    "source": "source/create_shophouses.py",
+    "style": "Vietnamese-inspired stylized shophouse",
+    "additional_attribution_required": false,
+    "sha256": "7d1265f2f4cb95351b800981e6a28f6662477d16fe78613fecd44fc1ca4cd7be"
+  },
+  {
+    "file": "models/buildings/cream_shophouse.glb",
+    "origin": "original model generated for this task, not a downloaded or surveyed building",
+    "source": "source/create_shophouses.py",
+    "style": "Vietnamese-inspired stylized shophouse",
+    "additional_attribution_required": false,
+    "sha256": "9c4ec2ce79ebda750085556f7abd86948f2c6c83e5cc5395fd1ff157de9d815a"
+  },
+  {
+    "file": "models/buildings/mint_tubehouse.glb",
+    "origin": "original model generated for this task, not a downloaded or surveyed building",
+    "source": "source/create_shophouses.py",
+    "style": "Vietnamese-inspired stylized shophouse",
+    "additional_attribution_required": false,
+    "sha256": "cd80ced6e36d4d37843a91783c78acb89a8688c1f6ea24b492665823d4cda1c3"
+  },
+  {
+    "file": "models/buildings/ochre_corner_shop.glb",
+    "origin": "original model generated for this task, not a downloaded or surveyed building",
+    "source": "source/create_shophouses.py",
+    "style": "Vietnamese-inspired stylized shophouse",
+    "additional_attribution_required": false,
+    "sha256": "dce916f67b72cf9b5dc0128adf67cd981a002c202f4e96063981e81063f33a09"
+  }
+]
