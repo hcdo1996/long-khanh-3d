@@ -44,11 +44,11 @@ The scene does not say which figure is Lê A; the sources pair the names with th
 
 ## Rear inscription
 
-The task suggested "THẦN TỐC / TÁO BẠO / BẤT NGỜ / CHẮC THẮNG". No source or photograph available to me shows this wording on the monument. The reference photos show gold lettering on more than one face, but it cannot be read. The scene keeps the plain gold bars.
+The owner asked for "THẦN TỐC / TÁO BẠO / BẤT NGỜ / CHẮC THẮNG" on the rear face, and it is now displayed there. It is a **user-requested reconstruction, not a verified inscription**: no source or photograph available to me shows this wording on the monument (the reference photos show gold lettering on more than one face, but it cannot be read). The code comment and the in-app credits say so. If a readable photo of the rear face turns up, the text should be corrected to match it.
 
 ## Reliefs
 
-Reference frames t070s, t076s and t080s and Flickr photos 11 and 12 show a white relief band with a continuous procession of figures, some with rifles and flags. I could not confirm the suggested split (marching on two faces, celebration on the rear). The band is now one carved-silhouette texture of soldiers and civilians advancing, used on all three faces and labelled in the credits as an interpretation.
+Reference frames t070s, t076s and t080s and Flickr photos 11 and 12 show a white relief band with a continuous procession of figures, some with rifles and flags. I could not confirm the suggested split (marching on two faces, celebration on the rear). At the owner's request the band now uses the two supplied textures (`models/textures/relief_march.jpg` on the front faces, `relief_celebration.jpg` on the rear). Their provenance is unknown; they are labelled in the credits as an interpretation, not a copy of the real reliefs.
 
 ## Statue scale
 
@@ -63,5 +63,14 @@ None of the sources, the reference photographs or the earlier evidence notes men
 ## Roads and businesses
 
 - QL 1 on the west side and Hùng Vương on the east side match the satellite review in the earlier reference pack. Labels unchanged; the tank island was not moved.
-- Highlands Coffee (239 Hùng Vương), Khách sạn Hòa Bình (110 Hùng Vương), Nước Sâm Bà Bảy (175 Hùng Vương): their positions relative to the modelled blocks could not be confirmed, so no real business names were placed. Signs stay generic.
+- Highlands Coffee (239 Hùng Vương): a public map pin puts it across Hùng Vương from the middle of the park. Its sign is placed on the nearest generated shophouse, marked as approximate; the facade is generic. Details in `STOREFRONT_PLACEMENTS.json`.
+- Sacombank (259 Hùng Vương): address confirmed, but no coordinate source found, so it is listed as pending and not placed.
+- Khách sạn Hòa Bình (110 Hùng Vương), Nước Sâm Bà Bảy (175 Hùng Vương): still leads only; not placed. All other signs stay generic.
 - Công viên Bia Chiến thắng is a separate park (Xuân Lộc quarter, built 1985, renovated 2009 and 2019) and is not part of this scene. Neither is the Lê Lợi walking street.
+
+## Gameplay additions (not part of the real park)
+
+- **Lotus light mast**: moved to the centre of the lotus at the owner's request (scene x 47, z 0). Its exact real position was not re-verified.
+- **Traffic lights, pedestrian signals and the traffic officer** at the Hùng Vương crossing (scene x ≈ −8): a gameplay feature. I have no evidence of signals or a zebra crossing at this spot.
+- **Fireworks events** ("Đêm Long Khánh", "Đêm giao thừa", "Mừng ngày 21/4"): fictional shows, not records of real events.
+- **Side quests, crates, litter, hurdles, the photo ring and the seating/eating system**: game props.

@@ -55,4 +55,8 @@ unless noted. Only the files listed here are shipped; the pack's other alternati
   modify and redistribute, no attribution required. Sign lettering was converted from DejaVu Sans Bold into geometry.
   CC BY 3.0: https://creativecommons.org/licenses/by/3.0/
 Scooter riders, food carts other than the bánh mì cart, Christmas lights, rain, the relief band texture and the guide's
-pennant are drawn by the page's own code. The relief band is an interpretation of the reference photos, not a copy.
+pennant are drawn by the page's own code.
+
+Relief textures (models/textures/relief_march.jpg, relief_celebration.jpg), added 16 Nov 2026: supplied by the project owner,
+provenance unknown, resized to 2048x512. Used as an interpretation of the relief band, not a copy of the real reliefs.
+Fireworks, traffic signals, the traffic officer's uniform and the quest props are drawn by the page's own code.

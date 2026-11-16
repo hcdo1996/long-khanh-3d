@@ -81,3 +81,54 @@ Same benchmark, same headless Chrome 153, 1280×720, device pixel ratio 1, softw
 | Tối đa | Đêm | Vỉa hè Hùng Vương | 1,288,947 | 1,289,720 | 767 | 718 | 4339 | 3916 | 4 | 4 |
 
 Summary: frame time is unchanged or slightly lower in 23 of 27 cells. The park-tip view now contains the dog, the guide and the tourists, so on Nhẹ it draws 391 calls instead of 268. That costs nothing measurable on the software renderer, but it is the view to watch on a weak GPU.
+
+# Phase 3 (upgrade: events, jumping, traffic, quests, seating) against Phase 2
+
+Both builds were run back to back on the same machine (headless Chrome, 1280×720, DPR 1, software renderer, no GPU). Frame times show relative change only; they are not real-device FPS. Phase 2 was re-measured in this session, so its numbers differ a little from the table above. The new **Đêm + pháo hoa** condition runs the night scene with a fireworks show in progress.
+
+| Tier | Condition | Viewpoint | Triangles P2 | P3 | Draw calls P2 | P3 | Frame ms P2 | P3 |
+|---|---|---|---:|---:|---:|---:|---:|---:|
+| Nhẹ | Ngày nắng | Sân tượng đài | 381,927 | 381,481 | 416 | 419 | 3066 | 3133 |
+| Nhẹ | Ngày nắng | Mũi công viên | 435,327 | 437,068 | 391 | 410 | 3137 | 3196 |
+| Nhẹ | Ngày nắng | Vỉa hè Hùng Vương | 342,330 | 343,483 | 137 | 150 | 1662 | 1640 |
+| Nhẹ | Ngày mưa | Sân tượng đài | 384,588 | 384,462 | 384 | 387 | 2961 | 3011 |
+| Nhẹ | Ngày mưa | Mũi công viên | 435,211 | 436,952 | 339 | 358 | 3029 | 3021 |
+| Nhẹ | Ngày mưa | Vỉa hè Hùng Vương | 342,330 | 343,483 | 138 | 151 | 1564 | 1636 |
+| Nhẹ | Đêm | Sân tượng đài | 389,870 | 389,744 | 389 | 392 | 3775 | 3775 |
+| Nhẹ | Đêm | Mũi công viên | 435,189 | 436,930 | 339 | 358 | 4278 | 4250 |
+| Nhẹ | Đêm | Vỉa hè Hùng Vương | 344,627 | 345,506 | 139 | 154 | 2000 | 2040 |
+| Nhẹ | Đêm + pháo hoa | Sân tượng đài | — | 385,922 | — | 389 | — | 3858 |
+| Nhẹ | Đêm + pháo hoa | Mũi công viên | — | 438,934 | — | 369 | — | 4222 |
+| Nhẹ | Đêm + pháo hoa | Vỉa hè Hùng Vương | — | 348,492 | — | 158 | — | 2033 |
+| Cao | Ngày nắng | Sân tượng đài | 607,064 | 605,978 | 396 | 399 | 4375 | 4166 |
+| Cao | Ngày nắng | Mũi công viên | 526,723 | 527,148 | 352 | 368 | 4178 | 4016 |
+| Cao | Ngày nắng | Vỉa hè Hùng Vương | 421,452 | 422,331 | 143 | 158 | 1990 | 2013 |
+| Cao | Ngày mưa | Sân tượng đài | 567,617 | 563,997 | 397 | 398 | 3950 | 3916 |
+| Cao | Ngày mưa | Mũi công viên | 549,242 | 551,467 | 350 | 369 | 4028 | 4028 |
+| Cao | Ngày mưa | Vỉa hè Hùng Vương | 421,452 | 422,331 | 144 | 159 | 2017 | 2060 |
+| Cao | Đêm | Sân tượng đài | 631,401 | 629,675 | 401 | 404 | 5508 | 5591 |
+| Cao | Đêm | Mũi công viên | 558,188 | 558,649 | 340 | 359 | 5841 | 6025 |
+| Cao | Đêm | Vỉa hè Hùng Vương | 424,293 | 425,194 | 142 | 160 | 2600 | 2639 |
+| Cao | Đêm + pháo hoa | Sân tượng đài | — | 598,961 | — | 391 | — | 5666 |
+| Cao | Đêm + pháo hoa | Mũi công viên | — | 527,068 | — | 360 | — | 5758 |
+| Cao | Đêm + pháo hoa | Vỉa hè Hùng Vương | — | 421,972 | — | 161 | — | 2694 |
+| Tối đa | Ngày nắng | Sân tượng đài | 1,465,254 | 1,459,889 | 981 | 999 | 6016 | 5933 |
+| Tối đa | Ngày nắng | Mũi công viên | 1,403,632 | 1,406,356 | 987 | 1043 | 5700 | 5583 |
+| Tối đa | Ngày nắng | Vỉa hè Hùng Vương | 1,287,304 | 1,288,096 | 708 | 753 | 3422 | 3355 |
+| Tối đa | Ngày mưa | Sân tượng đài | 1,465,036 | 1,459,109 | 984 | 1002 | 6000 | 5766 |
+| Tối đa | Ngày mưa | Mũi công viên | 1,405,364 | 1,406,356 | 998 | 1044 | 5691 | 5533 |
+| Tối đa | Ngày mưa | Vỉa hè Hùng Vương | 1,294,594 | 1,294,934 | 709 | 753 | 3422 | 3422 |
+| Tối đa | Đêm | Sân tượng đài | 1,458,561 | 1,454,441 | 977 | 1000 | 7825 | 7650 |
+| Tối đa | Đêm | Mũi công viên | 1,407,986 | 1,403,194 | 996 | 1022 | 7250 | 7150 |
+| Tối đa | Đêm | Vỉa hè Hùng Vương | 1,293,866 | 1,290,262 | 717 | 757 | 4092 | 4108 |
+| Tối đa | Đêm + pháo hoa | Sân tượng đài | — | 1,451,869 | — | 995 | — | 7650 |
+| Tối đa | Đêm + pháo hoa | Mũi công viên | — | 1,393,736 | — | 1019 | — | 7391 |
+| Tối đa | Đêm + pháo hoa | Vỉa hè Hùng Vương | — | 1,280,438 | — | 756 | — | 4125 |
+
+Summary:
+
+- Frame time is within run-to-run noise of Phase 2 in every shared cell (between −5% and +5%).
+- Draw calls rise by up to about 55 per view (traffic and pedestrian signal heads, zebra and stop lines, quest props, seat/eat props). Triangles rise by under 1%.
+- A running fireworks show changes frame time by −4% to +4% against plain night: sparks are one pooled `THREE.Points` draw (1,800 slots, 320/900/1,800 live caps for Nhẹ/Cao/Tối đa), no per-spark mesh or light; the single flash light is used only on Tối đa.
+- With no show running, the event system costs nothing per frame beyond one state check: the points object is hidden and nothing is updated.
+- 20 start/stop cycles left geometry, texture and scene-object counts unchanged (616 / 267 / 643 before and after).
