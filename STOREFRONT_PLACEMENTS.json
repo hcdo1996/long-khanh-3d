@@ -1,0 +1,53 @@
+{
+  "about": "Real storefronts near Công viên Tượng đài Chiến thắng Long Khánh. A storefront is drawn in the scene only when its position was resolved from a map pin. Scene frame: +x = south (toward the park tip), +z = west (QL1 side); the park centre is near x = 10, z = 0; 1 unit = 1 m.",
+  "reviewed": "2026-11-16",
+  "imagery": {
+    "file": "maps/satellite_context.jpg (from the reference bundle; not published)",
+    "source": "Esri World Imagery (Vantor), capture date 2025-02-05, EPSG:3857, 0.597 m/px",
+    "note": "Imagery shows roofs, not signs. It was used to measure the offset between the pin and the monument, not to identify the shop."
+  },
+  "stores": [
+    {
+      "id": "highlands-239-hung-vuong",
+      "name": "Highlands Coffee",
+      "address": "239 Hùng Vương, phường Xuân Hòa (khu phố 5), Long Khánh, Đồng Nai",
+      "status": "placed-approximate",
+      "address_evidence": [
+        "diadiemlongkhanh.com listing: 239 Hùng Vương, described as facing the view of the monument",
+        "bank/partner store lists (VPBank, VRBank, GotIt) giving the same address",
+        "Đồng Nai TV coverage placing the shop at the Victory Monument"
+      ],
+      "coordinates": { "lat": 10.9229678, "lon": 107.2397077, "source": "map pin embedded in the diadiemlongkhanh.com listing", "accuracy": "directory pin, not surveyed; treat as +/- 15 m" },
+      "reference_point": { "name": "monument POI", "lat": 10.9233996, "lon": 107.2393154, "source": "tanitour.com POI; not a surveyed centre" },
+      "offset_from_reference_m": { "east": 42.9, "south": 48.1 },
+      "scene_estimate": { "x": 14, "z": -43, "meaning": "across Hùng Vương from the middle of the park, on the corner just north of a side-street mouth" },
+      "placement": "The 'HIGHLANDS COFFEE' shop sign is put on the generated shophouse nearest the estimate (within 12 m; the test run found it about 3 m away). Plain text sign only, no logo. An info prompt at the door says the location is approximate.",
+      "facade_evidence": "none used. No photo of this storefront was available, so the building is the generic stylised shophouse; width, height, colours and signage layout are NOT verified."
+    },
+    {
+      "id": "sacombank-259-hung-vuong",
+      "name": "Sacombank (PGD Long Khánh area)",
+      "address": "259 Hùng Vương, khu phố 5, phường Xuân Hòa, Long Khánh, Đồng Nai",
+      "status": "pending",
+      "address_evidence": [
+        "Sacombank relocation notice (2019) carried by kisvn.vn / vietstock.vn: '259 Hung Vuong, area 5, Xuan Hoa Ward'",
+        "thebank.vn branch listing with the same address"
+      ],
+      "coordinates": null,
+      "reason_pending": "No map pin or other coordinate source was found. House numbers on this stretch are not on the imagery, so the parcel could not be picked by counting from 239. Not placed, to avoid putting a real bank on the wrong building.",
+      "to_resolve": "A Google Maps / OpenStreetMap pin, or a street-level photo showing the bank next to a known landmark."
+    },
+    {
+      "id": "hoa-binh-110",
+      "name": "Hòa Bình (110 …)",
+      "status": "lead",
+      "note": "Mentioned in the earlier reference notes; address and position not checked in this pass."
+    },
+    {
+      "id": "nuoc-sam-ba-bay-175",
+      "name": "Nước Sâm Bà Bảy (175 …)",
+      "status": "lead",
+      "note": "Mentioned in the earlier reference notes; address and position not checked in this pass."
+    }
+  ]
+}
