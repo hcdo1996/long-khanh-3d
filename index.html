@@ -16,6 +16,19 @@
   #title .chip { display: inline-block; margin-top: 5px; padding: 3px 9px; border-radius: 9px; background: rgba(255,255,255,.13); font-size: 12.5px; font-weight: 700; letter-spacing: 0; font-variant-numeric: tabular-nums; }
   #shot { bottom: 22px; right: 132px; width: 46px; height: 42px; padding: 0; font-size: 19px; border-radius: 50%; }
   .note p.done { opacity: .6; text-decoration: line-through; }
+  #hud.off { visibility: hidden; pointer-events: none; }
+  #hudhide { bottom: 118px; right: 132px; width: 46px; height: 42px; padding: 0; font-size: 17px; border-radius: 50%; }
+  #hudshow { position: fixed; top: 10px; right: 10px; z-index: 30; width: 46px; height: 46px; border: 0; border-radius: 50%; background: rgba(18,28,38,.4); color: rgba(255,255,255,.75); font-size: 18px; cursor: pointer; display: none; }
+  #ghostjoy { position: fixed; left: 0; bottom: 0; width: 190px; height: 190px; z-index: 25; display: none; touch-action: none; }
+  #act { position: fixed; left: 50%; bottom: 168px; transform: translateX(-50%); z-index: 6; display: none; border: 0; color: #17212b; background: #f2c14e; font: inherit; font-size: 14px; font-weight: 700; padding: 12px 18px; min-height: 46px; border-radius: 24px; cursor: pointer; box-shadow: 0 3px 12px rgba(0,0,0,.35); max-width: calc(100vw - 180px); }
+  #dlg, #tour { position: fixed; left: 50%; transform: translateX(-50%); z-index: 8; display: none; box-sizing: border-box; width: min(430px, calc(100vw - 20px)); padding: 13px 14px 12px; font-size: 13.5px; line-height: 1.45; background: rgba(14,22,31,.94); border: 1px solid rgba(255,255,255,.18); }
+  #dlg { top: 50%; transform: translate(-50%, -50%); max-height: calc(100vh - 40px); overflow-y: auto; } #tour { bottom: 14px; }
+  #dlg h2, #tour h2 { margin: 0 52px 6px 0; font-size: 15px; } #dlg p, #tour p { margin: 0 0 8px; }
+  #dlg .row { display: flex; align-items: center; gap: 8px; margin: 0 0 7px; } #dlg .row span { flex: 1; }
+  #dlg button, #tour button { font: inherit; font-size: 13px; border: 0; border-radius: 10px; padding: 10px 12px; min-height: 42px; background: rgba(255,255,255,.16); color: #fff; cursor: pointer; }
+  #dlg button.go, #tour button.go { background: #f2c14e; color: #17212b; font-weight: 700; } #dlg button:disabled, #tour button:disabled { opacity: .45; cursor: default; }
+  #dlg .x, #tour .x { position: absolute; top: 5px; right: 5px; width: 44px; height: 44px; padding: 0; font-size: 22px; }
+  #tour .btns { display: flex; flex-wrap: wrap; gap: 6px; } #dlgmsg { color: #ffe08a; min-height: 1.4em; }
   #fps { bottom: 70px; right: 132px; width: 46px; height: 42px; padding: 0; font-size: 11px; font-weight: 700; border-radius: 50%; }
   #perf { position: fixed; left: 10px; bottom: 160px; z-index: 5; display: none; padding: 8px 10px; font: 11.5px/1.45 ui-monospace, Menlo, Consolas, monospace; white-space: pre; pointer-events: auto; max-width: calc(100vw - 20px); overflow: hidden; }
   #perf button { font: inherit; margin-top: 5px; margin-right: 6px; padding: 6px 9px; border: 0; border-radius: 8px; background: rgba(255,255,255,.16); color: #fff; cursor: pointer; }
@@ -46,7 +59,7 @@
     #bar { top: 58px; max-width: calc(100vw - 190px); } #simnote { top: 104px; }
     #notes { top: 108px; right: 200px; max-height: calc(100vh - 118px); }
     #joy { width: 104px; height: 104px; bottom: 14px; }
-    #title .sub { display: none; } #title { padding: 5px 10px 6px; } #title .chip { margin-top: 2px; } #shot { bottom: 104px; right: 124px; } #fps { bottom: 148px; right: 124px; } #perf { bottom: 8px; left: 130px; }
+    #title .sub { display: none; } #title { padding: 5px 10px 6px; } #title .chip { margin-top: 2px; } #shot { bottom: 104px; right: 124px; } #fps { bottom: 148px; right: 124px; } #hudhide { bottom: 192px; right: 124px; } #act { bottom: 14px; left: 42%; } #tour { bottom: 8px; width: min(430px, calc(100vw - 300px)); } #perf { bottom: 8px; left: 130px; }
     #help { bottom: 148px; } #qual { bottom: 104px; } #tank { bottom: 60px; } #home { bottom: 16px; } .btn { padding: 9px 12px; } #wx { bottom: 16px; right: 124px; } #xmas { bottom: 60px; right: 124px; }
   }
   #boot { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px; text-align: center;
@@ -62,6 +75,7 @@
 <div id="view" role="application" aria-label="Cảnh 3D công viên Tượng đài Chiến thắng Long Khánh"></div>
 <div id="boot" role="status"><h1>Công viên Tượng đài<br>Chiến thắng Long Khánh</h1><div id="bootbar"><div id="bootfill"></div></div><p id="boottext">Đang tải mô hình…</p>
   <button id="bootskip" type="button" aria-label="Đóng màn hình tải và vào ngay">×</button></div>
+<div id="hud">
 <div id="title" class="panel">LONG KHÁNH<span class="sub">Công viên Tượng đài Chiến thắng · Đồng Nai</span><span class="chip" id="chip" title="Giờ, thời tiết và nhiệt độ mô phỏng">10:30 · Nắng · 31°C</span></div>
 <canvas id="map"></canvas>
 <div id="bar" class="panel" role="group" aria-label="Ánh sáng">
@@ -80,6 +94,13 @@
 <button id="qual" class="panel btn">Đồ họa</button>
 <button id="tank" class="panel btn">Tới xe tăng</button>
 <button id="home" class="panel btn">Về điểm đầu</button>
+<button id="hudhide" class="panel btn" aria-label="Ẩn giao diện / Hide HUD" title="Ẩn giao diện / Hide HUD (H)">👁</button>
+<button id="act" type="button"></button>
+<div id="dlg" class="panel" role="dialog" aria-modal="false" aria-labelledby="dlgtitle"><button class="x" type="button" aria-label="Đóng">×</button><h2 id="dlgtitle"></h2><div id="dlgbody"></div><p id="dlgmsg" role="status" aria-live="polite"></p></div>
+<div id="tour" class="panel" role="region" aria-label="Thuyết minh"><button class="x" type="button" aria-label="Kết thúc tham quan">×</button><h2 id="tourtitle"></h2><p id="tourtext" aria-live="polite"></p><div class="btns"><button id="tourlang" type="button">English</button><button id="tourspeak" type="button">🔊 Nghe đọc</button><button id="tourmute" type="button">Tắt tiếng</button><button id="tournext" type="button" class="go">Tiếp</button></div></div>
+</div>
+<button id="hudshow" type="button" aria-label="Hiện giao diện / Show HUD" title="Hiện giao diện / Show HUD (H)">👁</button>
+<div id="ghostjoy" aria-hidden="true"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/objects/Sky.js"></script>
@@ -132,6 +153,7 @@
     return el;
   }
   window.addEventListener('keydown', function (e) {       // Escape closes the topmost card
+    if (e.key === 'Escape' && typeof LIFE !== 'undefined' && LIFE.esc()) { e.preventDefault(); return; }      // an open dialog closes first
     if (e.key === 'Escape' && NOTES.open.length) { closeNote(NOTES.open[NOTES.open.length - 1].id, true); e.preventDefault(); }
   });
   function fatal(msg) { notify('fatal', 'Không mở được cảnh 3D', [msg], 'err'); }
@@ -372,6 +394,7 @@
   function glow(x, y, z, hex, size, kind) { var c = new THREE.Color(hex); GLOWS.push(x, y, z, c.r, c.g, c.b, size, GLOWS.length * 0.137 % 1 + Math.floor(GLOWS.length / 9) % 5, kind); }
   var XMAS = [0xff3b30, 0x34d058, 0xffc83d, 0x3b9bff, 0xfff1c9], VERT_MAT = null;
   function vmat() { return VERT_MAT || (VERT_MAT = lam(0xffffff, { vertexColors: true, roughness: 0.72 })); }
+  var LIFE_ACTORS = { guide: null, vendor: null, photos: 0 };
   var STALLS = [], BIKES = { list: [], geo: [], attach: function (g, mat) { BIKES.geo.push([g, mat]); BIKES.list.forEach(function (b, i) { if (i % 2 === (BIKES.geo.length - 1) % 2 || BIKES.geo.length === 1) BIKES.dress(b, BIKES.geo.length - 1); }); } };
   function shapeOf(pts) { var s = new THREE.Shape(); pts.forEach(function (p, i) { if (i) s.lineTo(p[0], -p[1]); else s.moveTo(p[0], -p[1]); }); return s; }
   function flatShape(pts, mat, y) { var g = new THREE.ShapeGeometry(shapeOf(pts)); g.rotateX(-Math.PI / 2); var m = addMesh(g, mat, 0, y, 0); m.userData.flat = true; return m; }
@@ -457,27 +480,42 @@
     g.fillStyle = '#f4f4f4'; g.fillRect(0, 0, w, h); speckle(g, w, h, 1400, 190, 255, 3); g.strokeStyle = 'rgba(90,60,55,.4)'; g.lineWidth = 3; g.strokeRect(0, 0, w, h);
   });
   tileTex.wrapS = tileTex.wrapT = THREE.RepeatWrapping; tileTex.repeat.set(24, 6);
-  var reliefTex = canvasTex(1024, 128, function (g, w, h) {       // abstract carved frieze: evokes the relief band, does not copy its scenes
-    g.fillStyle = '#e9e6de'; g.fillRect(0, 0, w, h); speckle(g, w, h, 2500, 200, 255, 3);
-    function fig(x, lean, col, o) {
-      g.strokeStyle = col; g.fillStyle = col; g.lineWidth = 5; g.lineCap = 'round';
-      var hy = 30 + rr(-4, 6) + o;
-      g.beginPath(); g.arc(x + lean * 8 + o, hy, 8, 0, 6.3); g.fill();
-      g.beginPath(); g.moveTo(x + lean * 6 + o, hy + 9); g.lineTo(x + o, 78 + o); g.lineTo(x - 12 * lean + o, 116 + o); g.moveTo(x + o, 78 + o); g.lineTo(x + 14 * lean + o, 116 + o);
-      g.moveTo(x + lean * 4 + o, hy + 20); g.lineTo(x + lean * 24 + o, hy + 30 + rr(-6, 6)); g.stroke();
-      g.lineWidth = 3; g.beginPath(); g.moveTo(x - lean * 10 + o, hy + 34); g.lineTo(x + lean * 30 + o, hy - 6 + rr(-8, 8)); g.stroke();
+  // relief band: an INTERPRETATION of what the photos show (a procession of soldiers and civilians with rifles and flags moving along the band).
+  // Drawn as simple carved silhouettes; the real panels' figures and scenes are not reproduced. One face = 2048 x 256 px over about 16.6 x 1.7 m.
+  var reliefTex = canvasTex(2048, 256, function (g, w, h) {
+    g.fillStyle = '#e6e2d8'; g.fillRect(0, 0, w, h); speckle(g, w, h, 9000, 196, 255, 3);
+    var keep = seed; seed = 7719;
+    function figure(x, k, sc, base, col) {                 // k: 0 soldier with rifle, 1 soldier with flag, 2 woman with conical hat, 3 soldier pointing ahead
+      g.save(); g.translate(x, base); g.scale(sc, sc); g.fillStyle = col; g.strokeStyle = col; g.lineCap = 'round'; g.lineJoin = 'round';
+      var lean = 0.22, st = rr(0.7, 1.1);
+      g.beginPath(); g.moveTo(-14, -112); g.lineTo(16, -112); g.lineTo(10 + 30 * lean, -178); g.lineTo(-10 + 30 * lean, -178); g.closePath(); g.fill();      // torso, leaning forward
+      g.lineWidth = 15; g.beginPath(); g.moveTo(-6, -112); g.lineTo(-26 * st, -56); g.lineTo(-42 * st, -2); g.moveTo(8, -112); g.lineTo(22 * st, -58); g.lineTo(36 * st, -4); g.stroke();      // striding legs
+      g.beginPath(); g.arc(4 + 40 * lean, -192, 13, 0, 6.3); g.fill();                                                                                       // head
+      if (k === 2) { g.beginPath(); g.moveTo(-22 + 40 * lean, -196); g.lineTo(30 + 40 * lean, -196); g.lineTo(4 + 40 * lean, -224); g.closePath(); g.fill(); }  // nón lá
+      else { g.beginPath(); g.arc(4 + 40 * lean, -198, 15, Math.PI, 0); g.fill(); g.fillRect(-15 + 40 * lean, -200, 38, 5); }                               // brimmed helmet
+      g.lineWidth = 11;
+      if (k === 0) { g.beginPath(); g.moveTo(10, -168); g.lineTo(30, -140); g.lineTo(40, -160); g.stroke(); g.lineWidth = 6; g.beginPath(); g.moveTo(10, -120); g.lineTo(58, -215); g.stroke(); }
+      else if (k === 1) { g.beginPath(); g.moveTo(10, -168); g.lineTo(26, -205); g.stroke(); g.lineWidth = 5; g.beginPath(); g.moveTo(22, -150); g.lineTo(34, -252); g.stroke();
+        g.beginPath(); g.moveTo(34, -252); g.quadraticCurveTo(60, -262, 86, -246); g.lineTo(84, -214); g.quadraticCurveTo(60, -228, 32, -218); g.closePath(); g.fill(); }
+      else if (k === 2) { g.beginPath(); g.moveTo(8, -168); g.lineTo(-10, -138); g.moveTo(14, -168); g.lineTo(40, -150); g.stroke(); g.fillRect(-30, -150, 30, 22); }      // carrying a basket
+      else { g.beginPath(); g.moveTo(12, -170); g.lineTo(62, -186); g.stroke(); g.beginPath(); g.moveTo(4, -166); g.lineTo(-20, -134); g.stroke(); }
+      g.restore();
     }
-    var keep = seed;
-    [['rgba(255,255,255,.9)', -2], ['rgba(120,113,100,.85)', 2], ['rgba(196,190,178,1)', 0]].forEach(function (p) { seed = 7719; for (var x = 22; x < w - 10; x += rr(26, 40)) fig(x, 1, p[0], p[1]); });
+    function row(base, sc, a, b, cols) {
+      for (var x = a; x < b; x += rr(46, 70) * sc) { var k = Math.floor(rr(0, 4)) | 0; cols.forEach(function (c) { figure(x + c[1], k, sc * rr(0.92, 1.05), base + c[2], c[0]); }); }
+    }
+    // back rank (shallower, lighter) then front rank; each figure is drawn as shadow, highlight and face so it reads as carved under top-left light
+    row(h - 20, 0.78, 10, w - 20, [['rgba(150,142,128,.55)', 3, 3], ['rgba(255,255,255,.7)', -2, -2], ['#d9d4c8', 0, 0]]);
+    seed = 8123; row(h - 6, 0.92, 30, w - 40, [['rgba(112,104,92,.85)', 4, 4], ['rgba(255,255,255,.9)', -2, -2], ['#cfc9bc', 0, 0]]);
     seed = keep;
-    g.fillStyle = 'rgba(120,113,100,.6)'; g.fillRect(0, 0, w, 4); g.fillRect(0, h - 4, w, 4);
+    g.fillStyle = 'rgba(120,113,100,.6)'; g.fillRect(0, 0, w, 5); g.fillRect(0, h - 5, w, 5);
   });
   reliefTex.wrapS = THREE.RepeatWrapping; reliefTex.repeat.set(3, 1);
   (function () {
     var y1 = PYR.baseH, y2 = PYR.baseH + PYR.bandH;
     function part(ya, yb, mat) { var m = addMesh(new THREE.CylinderGeometry(pyrR(yb), pyrR(ya), yb - ya, 3), mat, M.x, TY + (ya + yb) / 2, M.z); m.rotation.y = Math.PI / 2; return m; }
     part(0, y1, lam(0xa97c72, { flatShading: true, roughness: 0.4, map: rep(T_STONE, 8, 1) }));
-    part(y1, y2, lam(0xffffff, { map: reliefTex, bumpMap: rep(reliefTex, 3, 1), bumpScale: 0.12, flatShading: true, roughness: 0.85 }));
+    part(y1, y2, lam(0xffffff, { map: reliefTex, bumpMap: reliefTex, bumpScale: 0.05, flatShading: true, roughness: 0.85 }));      // shallow bump: low relief, no exaggerated depth
     part(y2, PYR.H, lam(0xbf8f83, { map: tileTex, bumpMap: tileTex, bumpScale: 0.01, flatShading: true, roughness: 0.42 }));
     function face(nx, nz, draw, yMid, pw, ph) {
       var tex = canvasTex(1024, 640, draw), rin = pyrR(yMid) / 2 + 0.06, slope = 0.5 * (PYR.R - PYR.Rtop) / PYR.H;
@@ -792,6 +830,17 @@
     });
   })();
 
+  // ---------- stone benches under the edge trees (2 m x 0.6 m; one merged mesh, box colliders) ----------
+  (function () {
+    var P = [];
+    [-1, 14, 34].forEach(function (x) { [1, -1].forEach(function (s) {
+      var z = s * (half(x) - 4.1), y = groundH(x, z);
+      P.push(bx(2.0, 0.12, 0.6, x, y + 0.42, z, 0xbdb7aa), bx(0.22, 0.36, 0.5, x - 0.72, y + 0.18, z, 0xa39d90), bx(0.22, 0.36, 0.5, x + 0.72, y + 0.18, z, 0xa39d90));
+      boxes.push({ x: x, z: z, c: 1, s: 0, hw: 1.05, hd: 0.36, h: 0.55 });
+    }); });
+    var m = new THREE.Mesh(bake(P), lam(0xffffff, { vertexColors: true, roughness: 0.9, map: rep(T_STONE, 2, 2) })); m.castShadow = m.receiveShadow = true; scene.add(m);
+  })();
+
   // ---------- buildings: representative shophouses (massing only; no real shop names) ----------
   (function () {
     function facade(floors) {
@@ -963,6 +1012,26 @@
       var KINDS = [['BÁNH MÌ', '#c0392b', 0xd9d9d9], ['HỦ TIẾU GÕ', '#1f5fb4', 0xcfd6dc], ['NƯỚC MÍA', '#2e7d32', 0xe6e0c8], ['CHÈ - TRÀ ĐÁ', '#ef6c00', 0xd9d9d9], ['XÔI - BÁNH BAO', '#00838f', 0xcfd6dc], ['BÁNH TRÁNG NƯỚNG', '#6a1b9a', 0xe6e0c8], ['PHỞ - BÚN BÒ', '#b71c1c', 0xd9d9d9], ['CÀ PHÊ MANG ĐI', '#5d4037', 0xcfd6dc]];
       var glassM = new THREE.MeshStandardMaterial({ color: C(0xd7eef5), transparent: true, opacity: 0.3, roughness: 0.08, metalness: 0.1, envMapIntensity: 0.6, depthWrite: false });
       STALLS.forEach(function (st, i) {
+        if (i === 0) {                                     // stall 0 becomes the café built from the supplied models (models/life); no procedural cart is drawn here
+          var cg = new THREE.Group(); cg.position.set(st.x, 0.04, st.z); cg.rotation.y = st.yaw; scene.add(cg); st.cafe = cg;
+          function put(name, x, y, z, ry, fit, shadow) {
+            gl.load('models/life/' + name + '.json', function (gltf) {
+              var m = gltf.scene; m.traverse(function (k) { if (k.isMesh) { k.castShadow = !!shadow; k.receiveShadow = true; if (k.material) k.material.envMapIntensity = 0.45; } });
+              if (fit) { var bb = new THREE.Box3().setFromObject(m), sz = bb.getSize(new THREE.Vector3()), sc = fit / Math.max(sz.x, sz.z); m.scale.setScalar(sc); y -= bb.min.y * sc; }      // one prop is not authored in metres: fit it by its footprint
+              m.position.set(x, y, z); m.rotation.y = ry || 0; cg.add(m); done();
+            });
+          }
+          put('banh_mi_cart_original', 0, 0, 0, 0, 0, true); put('vietnamese_menu_board', 1.25, 0, 0.35, -0.35, 0, true);
+          put('sidewalk_cafe_table', 0.2, 0, -1.5, 0, 0, true);
+          put('plastic_stool_red', -0.42, 0, -1.5, 0, 0, false); put('plastic_stool_blue', 0.82, 0, -1.5, 0, 0, false); put('plastic_stool_blue', 0.2, 0, -2.12, 0, 0, false); put('plastic_stool_red', 0.2, 0, -0.9, 0, 0, false);
+          put('pho_bowl_chopsticks', 0.05, 0.59, -1.42, 0.5, 0, false); put('ca_phe_sua_da', 0.42, 0.59, -1.62, 0, 0, false); put('ca_phe_sua_da', 0.0, 0.59, -1.68, 0, 0, false); put('banh_mi_sandwich', 0.36, 0.6, -1.36, 1.1, 0.2, false); put('vietnamese_coffee_phin', -0.38, 1.02, 0.05, 0, 0, false);
+          glow(st.x + st.fx * 0.3, 2.05, st.z + st.fz * 0.3, 0xffe2a8, 1.5, 0); FX.pools.push([st.x - st.fx * 0.8, st.z - st.fz * 0.8, 8]);
+          boxes.push({ x: st.x, z: st.z, c: Math.cos(st.yaw), s: Math.sin(st.yaw), hw: 0.8, hd: 0.55, h: 2.2 }); circles.push({ x: st.x + st.ax * 0.2 - st.fx * 1.5, z: st.z + st.az * 0.2 - st.fz * 1.5, r: 0.42, h: 0.6 });
+          st.vx = st.x - st.ax * 0.5 - st.fx * 0.85; st.vz = st.z - st.az * 0.5 - st.fz * 0.85; st.lx = st.vx + st.fx; st.lz = st.vz + st.fz;
+          st.tx = st.x + st.ax * 0.2 - st.fx * 1.5; st.tz = st.z + st.az * 0.2 - st.fz * 1.5;                        // table centre
+          st.seats = [[st.x - st.ax * 0.42 - st.fx * 1.5, st.z - st.az * 0.42 - st.fz * 1.5], [st.x + st.ax * 0.82 - st.fx * 1.5, st.z + st.az * 0.82 - st.fz * 1.5]];
+          return;
+        }
         var K = KINDS[i % KINDS.length], g = new THREE.Group(), body = K[2], P = [], stool = i % 2 ? 0xd63a2f : 0x2f6fd6;
         P.push(bx(1.6, 0.75, 0.78, 0, 0.78, 0, body), bx(1.66, 0.05, 0.84, 0, 1.17, 0, 0x8f979d), bx(1.5, 0.06, 0.7, 0, 0.36, 0, 0x6d7377));
         [[-0.62, 0.42], [0.62, 0.42], [-0.62, -0.42], [0.62, -0.42]].forEach(function (w) { P.push(cyl(0.2, 0.2, 0.07, w[0], 0.2, w[1], 0x1c1c1c, [Math.PI / 2, 0, 0], 12)); });
@@ -1137,46 +1206,102 @@
     STALLS.forEach(function (st, i) { PLAN.push({ id: [1, 5, 2, 6, 7, 3, 4, 0][i % 8], h: 1.58 + 0.03 * (i % 5), at: [st.vx, st.vz], look: [st.lx, st.lz] }); });      // one vendor behind each food cart
     var blobG = new THREE.CircleGeometry(0.34, 18); blobG.rotateX(-Math.PI / 2);
     var blobM = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.3, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -8, polygonOffsetUnits: -8 });
+    // extra people for the park-life features: all reuse the eight existing character files
+    if (STALLS[0] && STALLS[0].seats) {
+      var cf = STALLS[0];
+      PLAN.push({ id: 2, h: 1.66, sit: true, at: cf.seats[0], look: [cf.tx, cf.tz], drink: true }, { id: 5, h: 1.6, sit: true, at: cf.seats[1], look: [cf.tx, cf.tz] });      // two seated customers
+      PLAN[11].vendor = true;                                                                           // the café vendor (first stall vendor)
+    }
+    PLAN.push({ id: 6, h: 1.7, ts: 0.62, tourist: 'smartphone', route: [[30, -3.2], [3, -3.2, [M.x, M.z]], [30, -3.2], [52, -2.5, [TANK.x, TANK.z]]] },       // tourists: walk, stop at a viewpoint, raise a phone / camera, lower it, go on
+              { id: 1, h: 1.62, ts: 0.6, tourist: 'tourist_camera', route: [[18, 3.4], [40, 5.6, [LOTUS.x, LOTUS.z]], [8, 3.4, [M.x, M.z]]] });
+    PLAN.push({ id: 7, h: 1.71, ts: 0.68, guide: true, at: [35, 2.6], look: [START.x, START.z] });                                             // the tour guide
+    PLAN[0].umb = PLAN[2].umb = PLAN[4].umb = true;                                                                                            // in rain: these three carry umbrellas
+    PLAN[1].shelter = [19, half(19) - 5.2]; PLAN[3].shelter = [19, -(half(19) - 5.2)]; PLAN[5].shelter = [-17.8, -(terLim(-17.8) - 2.6)];      // these walk to cover (two under trees, one under a pavilion roof)
+    var YAX = new THREE.Vector3(0, 1, 0), V1 = new THREE.Vector3(), V2 = new THREE.Vector3(), Q1 = new THREE.Quaternion(), Q2 = new THREE.Quaternion();
+    var POSES = { photo: [[-0.12, 0.12, 1], [0.28, 0.8, 0.52]], umb: [[-0.1, -0.72, 0.68], [0.05, 0.96, 0.28]], drink: [[-0.1, -0.35, 0.93], [0.34, 0.88, 0.3]] };      // upper arm, forearm directions (character frame: +z forward, +y up, -x its right)
+    var LIFEP = {};                                         // shared prop models, loaded once
+    function lifeProp(name, cb) { var e = LIFEP[name]; if (e && e.scene) { cb(e.scene.clone()); return; } if (e) { e.q.push(cb); return; } e = LIFEP[name] = { q: [cb] }; loader.load('models/life/' + name + '.json', function (gltf) { gltf.scene.traverse(function (k) { if (k.isMesh) { k.castShadow = false; if (k.material) k.material.envMapIntensity = 0.45; } }); e.scene = gltf.scene; e.q.forEach(function (f) { f(gltf.scene.clone()); }); e.q = []; }); }
     function make(gltf, spec, n) {
       var root = new THREE.Group(), body = THREE.SkeletonUtils.clone(gltf.scene); root.add(body); body.updateMatrixWorld(true);
-      var lo = 1e9, hi = -1e9, v = new THREE.Vector3();
-      body.traverse(function (o) { if (o.isBone) { o.getWorldPosition(v); lo = Math.min(lo, v.y); hi = Math.max(hi, v.y); } if (o.isMesh) { o.frustumCulled = false; o.castShadow = false; o.receiveShadow = false; FX.dyn.push(o); } });
+      var lo = 1e9, hi = -1e9, v = new THREE.Vector3(), bones = {};
+      body.traverse(function (o) { if (o.isBone) { o.getWorldPosition(v); lo = Math.min(lo, v.y); hi = Math.max(hi, v.y); var bn = o.name.replace(/[^A-Za-z]/g, ''); if (/^(UpperArmR|LowerArmR|PalmR)$/.test(bn)) bones[bn] = o; } if (o.isMesh) { o.frustumCulled = false; o.castShadow = false; o.receiveShadow = false; FX.dyn.push(o); } });
       if (!(hi > lo)) return;
       var sc = spec.h / ((hi - lo) * 1.03); body.scale.multiplyScalar(sc); body.position.y = -lo * sc;
       root.add(new THREE.Mesh(blobG, blobM)); root.children[1].position.y = 0.03; FX.blobs.push(root.children[1]); if (typeof syncTier === 'function') syncTier();
-      var mixer = new THREE.AnimationMixer(body), want = spec.route ? '_Walk' : '_Idle', clip = null, idleClip = null, idleA = null, waiting = false;
-      gltf.animations.forEach(function (c) { if (c.name.slice(-want.length) === want) clip = c; if (/_Idle$/.test(c.name)) idleClip = c; });
-      if (clip) { var a = mixer.clipAction(clip); a.play(); a.time = (n * 0.37) % clip.duration; a.timeScale = spec.ts || 1; }
-      if (spec.route && idleClip) idleA = mixer.clipAction(idleClip);
-      var pts = spec.route, moving = !!(pts && clip), target = 1, speed = moving ? 2 * STEP * sc / clip.duration * spec.ts : 0;
-      var p0 = moving ? pts[0] : spec.at; root.position.set(p0[0], groundH(p0[0], p0[1]), p0[1]);
-      if (!moving) root.rotation.y = Math.atan2(spec.look[0] - p0[0], spec.look[1] - p0[1]);
+      var mixer = new THREE.AnimationMixer(body), clips = {}; gltf.animations.forEach(function (c) { clips[c.name.split('_').pop()] = c; });
+      var pts = spec.route, walker = !!(pts && clips.Walk), walkA = clips.Walk ? mixer.clipAction(clips.Walk) : null, idleA = clips.Idle ? mixer.clipAction(clips.Idle) : null, sitA = spec.sit && clips.Sitting ? mixer.clipAction(clips.Sitting) : null;
+      if (walkA) walkA.timeScale = spec.ts || 1;
+      var cur = null; function play(a) { if (!a || cur === a) return; a.reset().play(); if (cur) cur.crossFadeTo(a, 0.25, false); cur = a; }
+      play(sitA || (walker ? walkA : idleA)); if (cur) cur.time = (n * 0.37) % cur.getClip().duration;
+      var target = 1, speed = walkA ? 2 * STEP * sc / clips.Walk.duration * (spec.ts || 0.65) : 0;
+      var p0 = walker ? pts[0] : spec.at; root.position.set(p0[0], groundH(p0[0], p0[1]) + (spec.sit ? -0.14 : 0), p0[1]);
+      if (!walker) root.rotation.y = Math.atan2(spec.look[0] - p0[0], spec.look[1] - p0[1]);
       scene.add(root);
+      // optional hand prop (phone, camera, umbrella, glass): kept in the character's frame and moved to the palm each frame, so no bone scale is inherited
+      var prop = null, pose = { w: 0, want: 0, kind: null }, propOff = [0, 0, 0];
+      function hold(name, kind, rot, off, sc2) { pose.kind = kind; propOff = off; lifeProp(name, function (m) { m.rotation.set(rot[0], rot[1], rot[2]); if (sc2) m.scale.setScalar(sc2); m.visible = false; root.add(m); prop = m; }); }
+      if (spec.tourist === 'smartphone') hold('smartphone', 'photo', [Math.PI / 2, 0, 0], [0, 0.06, 0.03]);
+      else if (spec.tourist) hold('tourist_camera', 'photo', [0, Math.PI, 0], [0, 0.0, 0.05]);
+      else if (spec.umb) hold('umbrella_open', 'umb', [0, 0, 0], [0, -0.12, 0]);
+      else if (spec.drink) hold('ca_phe_sua_da', 'drink', [0, 0, 0], [0, -0.08, 0.02]);
+      if (spec.guide) {                                    // identifiable guide: a pennant on a pole and a caption overhead
+        var gm = new THREE.Mesh(bake([cyl(0.014, 0.014, 2.25, -0.3, 1.12, 0.06, 0xd8d8d8, null, 6), bx(0.46, 0.3, 0.012, -0.07, 2.08, 0.06, 0xf2c14e)]), vmat()); root.add(gm);
+        var cap = new THREE.Sprite(new THREE.SpriteMaterial({ map: canvasTex(256, 64, function (g) { g.clearRect(0, 0, 256, 64); g.fillStyle = 'rgba(14,22,31,.85)'; g.fillRect(0, 8, 256, 48); g.fillStyle = '#ffe08a'; g.font = '700 26px "Segoe UI", Roboto, Arial, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('HƯỚNG DẪN VIÊN', 128, 33); }), depthWrite: false })); cap.scale.set(1.5, 0.375, 1); cap.position.set(0, 2.5, 0); root.add(cap);
+      }
+      var A = { root: root, spec: spec, goal: null, arrived: true, state: 'go', t: 0, look: null };
+      if (spec.guide) LIFE_ACTORS.guide = A; if (spec.vendor) LIFE_ACTORS.vendor = A;
+      function aim(bone, d, w) { if (!bone) return; V1.set(d[0], d[1], d[2]).applyQuaternion(root.quaternion).normalize(); bone.parent.getWorldQuaternion(Q1); Q2.setFromUnitVectors(YAX, V1); Q1.invert().multiply(Q2); bone.quaternion.slerp(Q1, w); }
+      function walkTo(tx, tz, dt, rate) {                  // straight-line step with turning; returns the remaining distance
+        var dx = tx - root.position.x, dz = tz - root.position.z, d = Math.hypot(dx, dz); if (d < 0.06) return 0;
+        var st = Math.min(speed * dt, d); root.position.x += dx / d * st; root.position.z += dz / d * st; root.position.y = groundH(root.position.x, root.position.z);
+        var want = Math.atan2(dx, dz), diff = Math.atan2(Math.sin(want - root.rotation.y), Math.cos(want - root.rotation.y)); root.rotation.y += diff * Math.min(1, dt * (rate || 6)); return d;
+      }
+      function face(tx, tz, dt) { var want = Math.atan2(tx - root.position.x, tz - root.position.z), diff = Math.atan2(Math.sin(want - root.rotation.y), Math.cos(want - root.rotation.y)); root.rotation.y += diff * Math.min(1, dt * 5); }
       var accA = 0, accM = 0;
-      peds.push({ root: root, update: function (dt) {
+      peds.push({ root: root, actor: A, spec: spec, prop: function () { return prop; }, update: function (dt) {
         var cd = Math.hypot(camera.position.x - root.position.x, camera.position.z - root.position.z), near = DN[tier];
         FRUST_S.center.copy(root.position); FRUST_S.center.y += 0.9; FRUST_S.radius = 2.4;
         var vis = cd < 10 || (cd < 260 && FRUST.intersectsSphere(FRUST_S)); root.visible = vis;      // tested by hand with a generous sphere; the skinned meshes themselves are not auto-culled
         accA += dt; accM += dt;
-        if (vis && (cd < near || accA >= (cd < near * 2.2 ? 0.1 : 0.3))) { mixer.update(accA); accA = 0; PF.anim++; }      // nearby: every frame; further away 10 Hz, then 3 Hz; unseen: paused
-        if (accA > 1) accA = 1;
-        if (!moving) return;
+        var anim = vis && (cd < near || accA >= (cd < near * 2.2 ? 0.1 : 0.3));                       // nearby: every frame; further away 10 Hz, then 3 Hz; unseen: paused
+        if (anim) { mixer.update(accA); accA = 0; PF.anim++; } if (accA > 1) accA = 1;
+        var rainy = WX.rain > 0.5;
+        if (pose.kind === 'umb') pose.want = rainy ? 1 : 0; else if (pose.kind === 'drink') pose.want = (clock + n * 3) % 11 < 2.4 ? 1 : 0;
+        if (pose.kind) {
+          pose.w += Math.max(-dt * 2.2, Math.min(dt * 2.2, pose.want - pose.w));
+          if (pose.w > 0.01 && vis) { var P = POSES[pose.kind]; aim(bones.UpperArmR, P[0], pose.w); aim(bones.LowerArmR, P[1], pose.w); }
+          if (prop) { prop.visible = pose.kind === 'drink' || pose.w > 0.08; if (prop.visible && vis && bones.PalmR) { bones.PalmR.getWorldPosition(V2); root.worldToLocal(V2); prop.position.set(V2.x + propOff[0], V2.y + propOff[1], V2.z + propOff[2]); } }
+        }
+        if (spec.guide) {                                  // the guide walks only when the tour gives a goal
+          if (A.goal) { play(walkA); if (walkTo(A.goal[0], A.goal[1], dt) < 0.12) { A.path.shift(); A.goal = A.path[0] || null; if (!A.goal) { A.arrived = true; play(idleA); } } }
+          else if (A.look) face(A.look[0], A.look[1], dt);
+          return;
+        }
+        if (!walker) return;
         if (cd > near * 2.2 && accM < 0.25) return;                                                  // distant walkers advance four times a second
         dt = accM; accM = 0;
-        var dx = pts[target][0] - root.position.x, dz = pts[target][1] - root.position.z, d = Math.hypot(dx, dz);
-        if (d < 0.05) { target = (target + 1) % pts.length; return; }
-        var ax = pos.x - root.position.x, az = pos.z - root.position.z, ad = Math.hypot(ax, az), block = ad < 1.5 && (ax * dx + az * dz) > 0;      // the player is close and in the way: stop and wait
-        if (block !== waiting && idleA) { waiting = block; var from = block ? a : idleA, to = block ? idleA : a; to.reset().play(); from.crossFadeTo(to, 0.25, false); }
-        if (waiting) return;
-        var st = Math.min(speed * dt, d); root.position.x += dx / d * st; root.position.z += dz / d * st; root.position.y = groundH(root.position.x, root.position.z);
-        var want = Math.atan2(dx, dz), diff = Math.atan2(Math.sin(want - root.rotation.y), Math.cos(want - root.rotation.y)); root.rotation.y += diff * Math.min(1, dt * 6);
+        if (spec.shelter) {                                // rain: head for cover and wait there; walk on when it stops
+          if (rainy) { if (walkTo(spec.shelter[0], spec.shelter[1], dt) < 0.1) { play(idleA); face(0, 0, dt); } else play(walkA); return; }
+        }
+        if (A.state === 'photo') {                         // stopped at a viewpoint: turn, raise the phone / camera, hold, lower, go on
+          A.t += dt; face(A.look[0], A.look[1], dt); pose.want = A.t > 0.5 && A.t < 3.9 ? 1 : 0;
+          if (A.t > 4.7) { A.state = 'go'; target = (target + 1) % pts.length; play(walkA); }
+          return;
+        }
+        var ax = pos.x - root.position.x, az = pos.z - root.position.z, ad = Math.hypot(ax, az), tx = pts[target][0] - root.position.x, tz = pts[target][1] - root.position.z, block = ad < 1.5 && (ax * tx + az * tz) > 0;      // the player is close and in the way: stop and wait
+        if (block) { play(idleA); return; }
+        play(walkA);
+        if (walkTo(pts[target][0], pts[target][1], dt) < 0.08) {
+          if (pts[target][2] && !rainy && spec.tourist) { A.state = 'photo'; A.t = (n % 3) * -0.4; A.look = pts[target][2]; play(idleA); LIFE_ACTORS.photos++; }
+          else target = (target + 1) % pts.length;
+        }
       } });
     }
     var loader = new THREE.GLTFLoader();
     IDS.forEach(function (id, i) {
       loader.load(DIR + id + '.json', function (gltf) {
         gltf.scene.traverse(function (o) { if (o.isMesh && o.material) { o.material.envMapIntensity = 0.5; o.material.roughness = 0.85; o.material.metalness = 0; } });
-        PLAN.forEach(function (spec, n) { if (spec.id === i) make(gltf, spec, n); });
+        PLAN.forEach(function (spec, n) { if (spec.id === i) make(gltf, spec, n); });      // several people may share one file; each gets its own skeleton clone and mixer
       });
     });
   })();
@@ -1482,7 +1607,7 @@
     if (HSKY.U) { HSKY.U.uHaze.value = Math.min(0.96, 0.92 * WX.fog + 0.4 * WX.rain); HSKY.U.uHazeCol.value.copy(scene.fog.color); }
     WX.rainU.uLight.value = 0.25 + 0.75 * d;
     var hh = Math.floor(h), mm = Math.floor((h - hh) * 60 / 5) * 5, tc = Math.round(24 + 8 * Math.max(0, sy) - 3 * WX.rain - 2 * WX.cloud - 2 * WX.fog);
-    $('chip').textContent = (hh < 10 ? '0' : '') + hh + ':' + (mm < 10 ? '0' : '') + mm + ' · ' + WX.names[WX.mode] + ' · ' + tc + '°C';
+    $('chip').textContent = (hh < 10 ? '0' : '') + hh + ':' + (mm < 10 ? '0' : '') + mm + ' · ' + WX.names[WX.mode] + ' · ' + tc + '°C · ' + SAVE.d.coins + ' xu';
     var gk = sstep(0.25, 0.8, n); GLOW.u.uLamp.value = gk * 1.5 + 0.25 * Math.max(WX.rain, WX.fog) * d; GLOW.u.uBulb.value = 0.3 + 1.5 * gk;
     UNI.night.value = sstep(0.3, 0.9, n) * 3.2;
     if (POST.bloom) POST.bloom.strength = 0.16 + 0.55 * n + 0.12 * w;
@@ -1619,6 +1744,10 @@
     joy.x = dx / max; joy.y = -dy / max; knob.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
   }
   joyEl.addEventListener('pointerdown', function (e) { joy.id = e.pointerId; try { joyEl.setPointerCapture(e.pointerId); } catch (err) {} joyMove(e); e.preventDefault(); e.stopPropagation(); });
+  var ghost = $('ghostjoy'), gc = { x: 0, y: 0 };      // HUD hidden on a touch screen: an invisible region where the joystick was keeps movement working
+  ghost.addEventListener('pointerdown', function (e) { joy.id = e.pointerId; gc.x = e.clientX; gc.y = e.clientY; try { ghost.setPointerCapture(e.pointerId); } catch (err) {} e.preventDefault(); e.stopPropagation(); });
+  ghost.addEventListener('pointermove', function (e) { if (e.pointerId !== joy.id) return; var dx = e.clientX - gc.x, dy = e.clientY - gc.y, d = Math.hypot(dx, dy), mx2 = 46; if (d > mx2) { dx *= mx2 / d; dy *= mx2 / d; } joy.x = dx / mx2; joy.y = -dy / mx2; });
+  ['pointerup', 'pointercancel'].forEach(function (t) { ghost.addEventListener(t, function (e) { if (e.pointerId === joy.id) { joy.id = null; joy.x = joy.y = 0; } }); });
   joyEl.addEventListener('pointermove', function (e) { if (e.pointerId === joy.id) joyMove(e); });
   function joyEnd(e) { if (e.pointerId !== joy.id) return; joy.id = null; joy.x = joy.y = 0; knob.style.transform = 'translate(0px,0px)'; }
   joyEl.addEventListener('pointerup', joyEnd); joyEl.addEventListener('pointercancel', joyEnd);
@@ -1666,8 +1795,8 @@
   function showHelp() {
     delete NOTES.dismissed.welcome; delete NOTES.dismissed.credits;
     notify('welcome', 'Cách điều khiển', IS_TOUCH
-      ? ['Cần điều khiển bên trái: đi bộ (đẩy hết cỡ để chạy).', 'Kéo trên màn hình: xoay máy quay quanh nhân vật.', 'Hàng nút Ngày / Hoàng hôn / Đêm / Tự động đổi ánh sáng. Nút "Thời tiết" đổi Nắng / Nhiều mây / Mưa / Sương mù; nút "Noel" bật tắt đèn Giáng Sinh.', 'Mỗi thông báo có nút – để thu gọn và nút × để đóng. Bấm "? Trợ giúp" để mở lại.']
-      : ['W A S D hoặc phím mũi tên: đi bộ. Giữ Shift: chạy.', 'Kéo chuột: xoay máy quay quanh nhân vật. Lăn chuột: gần / xa.', 'Hàng nút Ngày / Hoàng hôn / Đêm / Tự động đổi ánh sáng. Nút "Thời tiết" đổi Nắng / Nhiều mây / Mưa / Sương mù; nút "Noel" bật tắt đèn Giáng Sinh.', 'Mỗi thông báo có nút – để thu gọn và nút × để đóng (hoặc phím Esc). Bấm "? Trợ giúp" để mở lại.']);
+      ? ['Cần điều khiển bên trái: đi bộ (đẩy hết cỡ để chạy).', 'Kéo trên màn hình: xoay máy quay quanh nhân vật.', 'Hàng nút Ngày / Hoàng hôn / Đêm / Tự động đổi ánh sáng. Nút "Thời tiết" đổi Nắng / Nhiều mây / Mưa / Sương mù; nút "Noel" bật tắt đèn Giáng Sinh.', 'Nút vàng hiện ra khi đứng gần xe bánh mì, hướng dẫn viên, chó, mèo: bấm để tương tác. Nút 👁 ẩn giao diện.', 'Mỗi thông báo có nút – để thu gọn và nút × để đóng. Bấm "? Trợ giúp" để mở lại.']
+      : ['W A S D hoặc phím mũi tên: đi bộ. Giữ Shift: chạy.', 'Kéo chuột: xoay máy quay quanh nhân vật. Lăn chuột: gần / xa.', 'Hàng nút Ngày / Hoàng hôn / Đêm / Tự động đổi ánh sáng. Nút "Thời tiết" đổi Nắng / Nhiều mây / Mưa / Sương mù; nút "Noel" bật tắt đèn Giáng Sinh.', 'Phím E: mua hàng, hỏi hướng dẫn viên, vuốt ve chó mèo. Phím H: ẩn / hiện giao diện. Phím P: bảng hiệu năng.', 'Mỗi thông báo có nút – để thu gọn và nút × để đóng (hoặc phím Esc). Bấm "? Trợ giúp" để mở lại.']);
   }
   function showCredits() {
     notify('credits', 'Ghi công và giấy phép', [
@@ -1681,7 +1810,10 @@
       ['Xe máy: "Scooter" của MiniPoly, CC BY 3.0; chỉ đổi cỡ và đóng gói lại.', 'https://poly.pizza/m/3vLV1QtLFP', 'poly.pizza'],
       ['Giấy phép CC BY 3.0:', 'https://creativecommons.org/licenses/by/3.0/', 'creativecommons.org/licenses/by/3.0'],
       'Người chạy xe máy, xe bán đồ ăn, đèn Noel, mưa và sương mù: dựng bằng mã từ hình khối đơn giản, không phải mô hình tải về. Người chạy xe ngồi trên hai mẫu xe máy ghi công ở trên.',
-      'Tượng đài, bệ, công viên: dựng tay từ ảnh tham khảo, không phải bản quét.']);
+      ['Mèo, chó Shiba: Quaternius (CC0). Điện thoại: smallbigsquare (CC0).', 'https://poly.pizza/m/qKICY6xla2', 'poly.pizza'],
+      ['Máy ảnh và dù mở: Poly by Google, CC BY 3.0; đã chuẩn hóa kích thước.', 'https://poly.pizza/m/0nfSsetwy0Z', 'poly.pizza'],
+      'Xe bánh mì, bảng thực đơn, bàn, ghế nhựa, bánh mì, phở, cà phê: mô hình cách điệu làm riêng cho dự án. Động tác giơ điện thoại, cầm dù, nâng ly là do trang tự tạo, không có sẵn trong mô hình.',
+      'Tượng đài, bệ, công viên: dựng tay từ ảnh tham khảo, không phải bản quét. Dải phù điêu là bản diễn giải đoàn người tiến bước trong ảnh, không phải bản sao các cảnh thật; chữ vàng ở hai mặt bên chưa đọc được nên để vạch trơn.']);
   }
   $('help').addEventListener('click', function () { showHelp(); showCredits(); delete NOTES.dismissed.quest; QUEST.show(false); this.blur(); });
   showHelp();
@@ -1758,7 +1890,7 @@
     $('benchgo').addEventListener('click', function () { o.run(false); this.blur(); }); $('benchall').addEventListener('click', function () { o.run(true); this.blur(); });
     return o;
   })();
-  window.__lk = { go: function (x, z, yaw) { pos.x = x; pos.z = z; camYaw = camYawS = yaw; heading = yaw + Math.PI; }, PF: PF, BENCH: BENCH, LOAD: LOAD, HSKY: HSKY, LODS: LODS, AUTOQ: AUTOQ, setQuality: function (t) { setQuality(t, false); }, scene: scene, renderer: renderer };      // console handle for testing
+  window.__lk = { groundH: groundH, at: function () { return [+pos.x.toFixed(2), +pos.z.toFixed(2)]; }, notifyTest: function () { notify('hudtest', 'Thông báo thử', ['Xuất hiện khi giao diện đang ẩn.']); }, STALLS: STALLS, ACTORS: LIFE_ACTORS, peds: peds, WX: WX, go: function (x, z, yaw, pitch, dist) { pos.x = x; pos.z = z; camYaw = camYawS = yaw; heading = yaw + Math.PI; if (pitch !== undefined) camPitch = pitch; if (dist) camDist = curDist = dist; }, PF: PF, BENCH: BENCH, LOAD: LOAD, HSKY: HSKY, LODS: LODS, AUTOQ: AUTOQ, setQuality: function (t) { setQuality(t, false); }, scene: scene, renderer: renderer };      // console handle for testing
   function drawMap() {
     var g = mctx; g.setTransform(MD, 0, 0, MD, 0, 0); g.clearRect(0, 0, MW, MH);
     g.strokeStyle = '#7b8189'; g.fillStyle = '#7b8189';
@@ -1777,10 +1909,22 @@
 
   // ---------- loop ----------
   var zone = '', last = 0, COOLDOWN = 25000;
+  // ---------- versioned local save: fictional coins ("xu"), purchases, quest progress. Nothing leaves the browser ----------
+  var SAVE = (function () {
+    var o = { d: { v: 2, coins: 50, inv: {}, done: {}, views: {}, cat: 0, paid: {} } };
+    try {
+      var raw = JSON.parse(localStorage.getItem('lk-save-v2') || 'null');
+      if (raw && raw.v === 2) { for (var k in o.d) if (raw[k] !== undefined && typeof raw[k] === typeof o.d[k]) o.d[k] = raw[k]; }
+      else (localStorage.getItem('lk-quest') || '').split(',').forEach(function (q) { if (q) o.d.done[q] = true; });       // progress from the earlier version
+    } catch (e) {}
+    o.store = function () { try { localStorage.setItem('lk-save-v2', JSON.stringify(o.d)); } catch (e) {} };
+    o.reward = function (key, n, why) { if (o.d.paid[key]) return false; o.d.paid[key] = 1; o.d.coins += n; o.store(); delete NOTES.dismissed.reward; notify('reward', 'Thưởng ' + n + ' xu', [why, 'Xu chỉ là tiền trong trò chơi, không phải tiền thật.']); return true; };      // each reward is paid once
+    return o;
+  })();
   // ---------- tasks ("Nhiệm vụ") and the souvenir photo. The task card is an ordinary notification, so it has – and × too ----------
   var QUEST = (function () {
-    var o = { shot: false, done: {}, T: [['mon', 'Đến chân Tượng đài Chiến thắng'], ['tank', 'Xem xe tăng 714'], ['lotus', 'Ghé đài sen và cột đèn giữa'], ['stall', 'Ghé một xe bán đồ ăn'], ['night', 'Ngắm công viên lên đèn ban đêm'], ['photo', 'Chụp một ảnh lưu niệm (nút 📷)']] };
-    try { (localStorage.getItem('lk-quest') || '').split(',').forEach(function (k) { if (k) o.done[k] = true; }); } catch (e) {}
+    var o = { shot: false, done: {}, T: [['mon', 'Đến chân Tượng đài Chiến thắng'], ['tank', 'Xem xe tăng 714'], ['lotus', 'Ghé đài sen và cột đèn giữa'], ['stall', 'Ghé một xe bán đồ ăn'], ['night', 'Ngắm công viên lên đèn ban đêm'], ['photo', 'Chụp một ảnh lưu niệm (nút 📷)'], ['drink', 'Mua một ly nước rồi ghé bàn cà phê'], ['views', 'Chụp ảnh ở 3 điểm ngắm (0/3)'], ['cat', 'Giúp cô bán bánh mì tìm mèo lạc']] };
+    o.done = SAVE.d.done;                                 // progress lives in the versioned save
     function count() { var c = 0; o.T.forEach(function (t) { if (o.done[t[0]]) c++; }); return c; }
     o.show = function (startMin) {
       var fresh = true; NOTES.open.forEach(function (n) { if (n.id === 'quest') fresh = false; });
@@ -1788,7 +1932,7 @@
       if (fresh && startMin) { var b = el.querySelector('.mn'); if (b) b.click(); }
     };
     function mark(k) {
-      if (o.done[k]) return; o.done[k] = true; try { localStorage.setItem('lk-quest', Object.keys(o.done).join(',')); } catch (e) {}
+      if (o.done[k]) return; o.done[k] = true; SAVE.store();
       if (!NOTES.dismissed.quest) o.show(false);
       if (count() === o.T.length) notify('questdone', 'Hoàn thành nhiệm vụ!', ['Bạn đã khám phá hết công viên Tượng đài Chiến thắng Long Khánh.']);
     }
@@ -1816,13 +1960,189 @@
         }, 'image/jpeg', 0.92);
       } catch (e) { notify('shoterr', 'Không chụp được ảnh', ['Trình duyệt không cho lưu ảnh từ cảnh 3D.'], 'err'); }
     };
-    $('shot').addEventListener('click', function () { o.shot = true; this.blur(); });
+    $('shot').addEventListener('click', function () { o.shot = true; if (typeof LIFE !== 'undefined') LIFE.photo(); this.blur(); });
     return o;
   })();
   QUEST.show(true);
+
+  // ---------- park life: one interaction system (E / the Interact button), café purchases with fictional coins, pets, tour guide, photo viewpoints, HUD toggle ----------
+  var LIFE = (function () {
+    var o = { acts: [], near: null, lock: 0, acc: 0, dlgOpen: false, hudOff: false }, act = $('act'), dlg = $('dlg'), tourEl = $('tour');
+    function typing() { var a = document.activeElement; return !!a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.isContentEditable); }
+    // --- interaction: the nearest interactable in range gets one prompt; E on a keyboard, the yellow button on touch
+    o.add = function (a) { o.acts.push(a); return a; };
+    function use() { var now = performance.now(); if (!o.near || now < o.lock || o.dlgOpen || o.hudOff) return; o.lock = now + 450; o.near.use(); }      // 450 ms lock: held keys and double taps count once
+    act.addEventListener('click', function () { use(); act.blur(); });
+    addEventListener('keydown', function (e) { if (e.code === 'KeyE' && !e.repeat && !typing()) use(); if (e.code === 'KeyH' && !e.repeat && !e.ctrlKey && !e.metaKey && !typing()) o.hud(); });
+    // --- dialog (shop). Built when opened or after a purchase, never per frame
+    function closeDlg() { o.dlgOpen = false; dlg.style.display = 'none'; }
+    dlg.querySelector('.x').addEventListener('click', closeDlg);
+    function openDlg(title, rows, note) {
+      $('dlgtitle').textContent = title; var b = $('dlgbody'); b.textContent = '';
+      rows.forEach(function (r) {
+        if (typeof r === 'string') { var p = document.createElement('p'); p.textContent = r; b.appendChild(p); return; }
+        var d = document.createElement('div'); d.className = 'row'; var sp = document.createElement('span'); sp.textContent = r[0]; d.appendChild(sp);
+        var bt = document.createElement('button'); bt.type = 'button'; bt.className = 'go'; bt.textContent = r[1]; bt.disabled = !!r[3]; bt.addEventListener('click', function () { var now = performance.now(); if (now < o.lock) return; o.lock = now + 600; r[2](); }); d.appendChild(bt); b.appendChild(d);
+      });
+      $('dlgmsg').textContent = note || ''; o.dlgOpen = true; dlg.style.display = 'block';
+    }
+    o.esc = function () { if (o.dlgOpen) { closeDlg(); return true; } if (TOUR.on) { tourEnd(); return true; } return false; };      // Escape: shop first, then the tour
+    var MENU = [['banhmi', 'Bánh mì', 15], ['caphe', 'Cà phê sữa đá', 12], ['trada', 'Trà đá', 3]];
+    function shop(note) {
+      var d = SAVE.d, rows = ['Ví của bạn: ' + d.coins + ' xu (tiền trong trò chơi, không phải tiền thật).'];
+      MENU.forEach(function (m) { rows.push([m[1] + ' · ' + m[2] + ' xu' + (d.inv[m[0]] ? '  (đã mua ' + d.inv[m[0]] + ')' : ''), 'Mua', function () { buy(m); }, d.coins < m[2]]); });
+      if (d.cat === 0 && !d.done.cat) rows.push(['"Con mèo của cô đi lạc trong công viên rồi…"', 'Nhận tìm giúp', function () { d.cat = 1; SAVE.store(); shop('Mèo vàng đang ở đâu đó trong công viên. Tìm, vuốt ve nó rồi quay lại đây.'); }]);
+      else if (d.cat === 1) rows.push('Nhiệm vụ: tìm mèo trong công viên và vuốt ve nó.');
+      else if (d.cat === 2) rows.push(['Mèo đã theo bạn về tới nơi.', 'Trả mèo', function () { d.cat = 3; SAVE.store(); QUEST.mark('cat'); SAVE.reward('cat', 20, 'Cô bán bánh mì cảm ơn bạn đã tìm được mèo.'); PETS.catHome(); shop('Cảm ơn con nhiều nghen!'); }]);
+      openDlg('Xe bánh mì - cà phê', rows, note);
+    }
+    function buy(m) {
+      var d = SAVE.d; if (d.coins < m[2]) { shop('Không đủ xu để mua ' + m[1] + '.'); return; }
+      d.coins -= m[2]; d.inv[m[0]] = (d.inv[m[0]] || 0) + 1; SAVE.store(); DAY.applied = -1;
+      shop('Đã mua ' + m[1] + ' (-' + m[2] + ' xu). Còn ' + d.coins + ' xu.' + (m[0] !== 'banhmi' && !d.done.drink ? ' Ghé bàn cà phê phía sau xe để ngồi nghỉ.' : ''));
+    }
+    // --- photo viewpoints: three marked spots; a souvenir photo taken on a spot counts once
+    var VIEWS = [['v1', 2, 0, 'tượng đài'], ['v2', 53.5, 2.5, 'xe tăng 714'], ['v3', 36, -7.5, 'đài sen']];
+    (function () {
+      var tex = canvasTex(128, 128, function (g) { g.clearRect(0, 0, 128, 128); g.strokeStyle = 'rgba(255,224,138,.95)'; g.lineWidth = 7; g.beginPath(); g.arc(64, 64, 56, 0, 6.3); g.stroke(); g.fillStyle = 'rgba(255,224,138,.95)'; g.fillRect(34, 48, 60, 40); g.fillRect(50, 38, 28, 12); g.fillStyle = 'rgba(20,30,40,.95)'; g.beginPath(); g.arc(64, 68, 13, 0, 6.3); g.fill(); });
+      var geo = new THREE.CircleGeometry(0.85, 24), mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -6, polygonOffsetUnits: -6 });
+      geo.rotateX(-Math.PI / 2);
+      VIEWS.forEach(function (v) { var m = new THREE.Mesh(geo, mat); m.position.set(v[1], groundH(v[1], v[2]) + 0.04, v[2]); m.userData.flat = true; scene.add(m); });
+    })();
+    function viewCount() { var n = 0; VIEWS.forEach(function (v) { if (SAVE.d.views[v[0]]) n++; }); return n; }
+    function viewLabel() { for (var i = 0; i < QUEST.T.length; i++) if (QUEST.T[i][0] === 'views') QUEST.T[i][1] = 'Chụp ảnh ở 3 điểm ngắm có vòng tròn máy ảnh (' + viewCount() + '/3)'; }
+    viewLabel();
+    o.photo = function () {
+      VIEWS.forEach(function (v) { if (!SAVE.d.views[v[0]] && Math.hypot(pos.x - v[1], pos.z - v[2]) < 3) { SAVE.d.views[v[0]] = 1; SAVE.store(); viewLabel(); delete NOTES.dismissed.view; notify('view', 'Điểm ngắm: ' + v[3], ['Đã ghi nhận ' + viewCount() + '/3 điểm ngắm.']); if (!NOTES.dismissed.quest) QUEST.show(false); } });
+      if (viewCount() === 3 && !SAVE.d.done.views) { QUEST.mark('views'); SAVE.reward('views', 20, 'Bạn đã chụp đủ ba điểm ngắm.'); }
+    };
+    // --- tour guide: three stops, Vietnamese / English text, optional read-aloud started only by the visitor
+    var TOUR = { on: false, i: 0, en: false, shown: false, muted: false, canSpeak: !!(window.speechSynthesis && window.SpeechSynthesisUtterance) };
+    var STOPS = [
+      { name: ['Tượng đài Chiến thắng', 'Victory Monument'], at: [-3.5, 3.2], stand: [-1.5, 5.2], look: [M.x, M.z],
+        vi: 'Tượng đài Chiến thắng Long Khánh ghi nhớ chiến dịch Xuân Lộc - Long Khánh, từ ngày 9 đến 21-4-1975. Tượng do nhà điêu khắc Trần Thanh Thanh thực hiện, hoàn thành năm 2001. Hai chiến sĩ một nam một nữ lấy nguyên mẫu từ hai anh hùng Lê A và Hồ Thị Hương. Khối tam giác cao 9 mét, thân tượng 12 mét, tổng cộng 21 mét, gợi nhớ ngày 21-4. Mười hai bậc cấp tượng trưng cho 12 ngày đêm của chiến dịch.',
+        en: 'The Long Khánh Victory Monument remembers the Xuân Lộc - Long Khánh campaign of 9 to 21 April 1975. It is the work of sculptor Trần Thanh Thanh and was completed in 2001. The two soldiers, a man and a woman, were modelled on two heroes of the armed forces, Lê A and Hồ Thị Hương. The triangular block is 9 metres high and the statue 12 metres, 21 metres in all, recalling 21 April. The twelve steps stand for the twelve days and nights of the campaign.' },
+      { name: ['Xe tăng 714', 'Tank 714'], at: [52, 5.2], stand: [54, 6.6], look: [TANK.x, TANK.z], via: [[36, 7.4]],
+        vi: 'Xe tăng số hiệu 714 thuộc Trung đoàn 165, Sư đoàn 7, Quân đoàn 4, đơn vị mở màn chiến dịch, được trưng bày trang trọng trong khu di tích. Chiếc xe trong mô hình này là xe T-54 dựng gần đúng, chưa xác định chính xác loại xe thật.',
+        en: 'Tank number 714 of Regiment 165, Division 7, 4th Corps, the unit that opened the campaign, is displayed in a place of honour at the site. The tank in this model is an approximate T-54; the exact type of the real vehicle has not been confirmed.' },
+      { name: ['Công viên', 'The park'], at: [37, -6.6], stand: [38.5, -8], look: [LOTUS.x, LOTUS.z], via: [[52, -5.5]],
+        vi: 'Quanh tượng đài là công viên cây xanh, nơi người dân dạo mát mỗi ngày. Đài sen, cột đèn và lối đi trong mô hình này được dựng tay theo ảnh tham khảo, chưa đo đạc thực địa.',
+        en: 'Around the monument is a green park where residents walk every day. The lotus sculpture, the light mast and the paths in this model were built by hand from reference photos, not surveyed.' } ];
+    function say(stop) { return TOUR.en ? stop.en : stop.vi; }
+    function tourPaint() {
+      var st = STOPS[TOUR.i], g = LIFE_ACTORS.guide, there = g && g.arrived && Math.hypot(pos.x - st.at[0], pos.z - st.at[1]) < 9;
+      $('tourtitle').textContent = (TOUR.i + 1) + '/3 · ' + st.name[TOUR.en ? 1 : 0];
+      $('tourtext').textContent = there ? say(st) : (TOUR.en ? 'Follow the guide with the yellow pennant to this stop.' : 'Hãy đi theo hướng dẫn viên cầm cờ vàng đến điểm này.');
+      $('tourlang').textContent = TOUR.en ? 'Tiếng Việt' : 'English'; $('tournext').textContent = there ? (TOUR.i === 2 ? (TOUR.en ? 'Finish' : 'Kết thúc') : (TOUR.en ? 'Next' : 'Tiếp')) : (TOUR.en ? 'Skip' : 'Bỏ qua');
+      $('tourspeak').disabled = !TOUR.canSpeak || !there || TOUR.muted; $('tourspeak').textContent = TOUR.canSpeak ? (TOUR.en ? '🔊 Read aloud' : '🔊 Nghe đọc') : (TOUR.en ? 'No speech here' : 'Máy không hỗ trợ đọc');
+      $('tourmute').textContent = TOUR.muted ? (TOUR.en ? 'Unmute' : 'Bật tiếng') : (TOUR.en ? 'Mute' : 'Tắt tiếng'); $('tourmute').setAttribute('aria-pressed', TOUR.muted ? 'true' : 'false'); TOUR.shown = there;
+    }
+    function hush() { try { if (TOUR.canSpeak) speechSynthesis.cancel(); } catch (e) {} }
+    function send(i) { var g = LIFE_ACTORS.guide, st = STOPS[i]; if (!g) return; g.path = (st.via || []).concat([st.stand]); g.goal = g.path[0]; g.arrived = false; g.look = st.look; }
+    function tourStart() { if (!LIFE_ACTORS.guide) return; TOUR.on = true; TOUR.i = 0; send(0); tourEl.style.display = 'block'; tourPaint(); }
+    function tourEnd() { hush(); TOUR.on = false; tourEl.style.display = 'none'; var g = LIFE_ACTORS.guide; if (g) { g.path = [[36, 7.4], g.spec.at]; g.goal = g.path[0]; g.arrived = false; g.look = [START.x, START.z]; } }
+    tourEl.querySelector('.x').addEventListener('click', tourEnd);
+    $('tournext').addEventListener('click', function () { hush(); if (TOUR.i >= 2 && TOUR.shown) { tourEnd(); return; } if (TOUR.i >= 2) { tourEnd(); return; } TOUR.i++; send(TOUR.i); tourPaint(); });
+    $('tourlang').addEventListener('click', function () { hush(); TOUR.en = !TOUR.en; tourPaint(); });
+    $('tourmute').addEventListener('click', function () { TOUR.muted = !TOUR.muted; hush(); tourPaint(); });
+    $('tourspeak').addEventListener('click', function () { if (!TOUR.canSpeak || TOUR.muted) return; hush(); try { var u = new SpeechSynthesisUtterance(say(STOPS[TOUR.i])); u.lang = TOUR.en ? 'en-US' : 'vi-VN'; speechSynthesis.speak(u); } catch (e) {} });      // speech only ever starts from this button
+    o.tour = TOUR;
+    // --- interactables
+    o.add({ label: 'Mua đồ ăn, nước uống', r: 2.3, pos: function () { var st = STALLS[0]; return st && st.cafe ? [st.x + st.fx * 1.3, st.z + st.fz * 1.3] : null; }, use: function () { shop(''); } });
+    o.add({ label: 'Hỏi hướng dẫn viên', r: 2.2, pos: function () { var g = LIFE_ACTORS.guide; return g && !TOUR.on ? [g.root.position.x, g.root.position.z] : null; }, use: tourStart });
+    // --- HUD visibility: one shared state; the restore button and the ghost joystick live outside the hidden container
+    o.hud = function (show) {
+      o.hudOff = show === undefined ? !o.hudOff : !show; var h = $('hud');
+      h.classList.toggle('off', o.hudOff); if (o.hudOff) h.setAttribute('inert', ''); else h.removeAttribute('inert'); h.setAttribute('aria-hidden', o.hudOff ? 'true' : 'false');
+      $('hudshow').style.display = o.hudOff ? 'block' : 'none'; $('ghostjoy').style.display = o.hudOff && IS_TOUCH ? 'block' : 'none';
+      if (o.hudOff && document.activeElement && h.contains(document.activeElement)) document.activeElement.blur();
+      joy.id = null; joy.x = joy.y = 0;
+    };
+    $('hudhide').addEventListener('click', function () { o.hud(false); }); $('hudshow').addEventListener('click', function () { o.hud(true); });
+    // --- per-frame work is only: nearest interactable (10 Hz), tour arrival check, café seat check
+    o.tick = function (dt) {
+      PETS.tick(dt);
+      o.acc += dt; if (o.acc < 0.1) return; o.acc = 0;
+      var best = null, bd = 1e9;
+      for (var i = 0; i < o.acts.length; i++) { var a = o.acts[i], p = a.pos(); if (!p) continue; var d = Math.hypot(pos.x - p[0], pos.z - p[1]); if (d < a.r && d < bd) { bd = d; best = a; } }
+      if (best !== o.near) { o.near = best; if (best) { act.textContent = (IS_TOUCH ? '' : 'E · ') + best.label; act.style.display = 'block'; } else act.style.display = 'none'; }
+      if (TOUR.on) { var st = STOPS[TOUR.i], g = LIFE_ACTORS.guide, there = g && g.arrived && Math.hypot(pos.x - st.at[0], pos.z - st.at[1]) < 9; if (there !== TOUR.shown) tourPaint(); }
+      var cf = STALLS[0]; if (cf && cf.tx !== undefined && !SAVE.d.done.drink && ((SAVE.d.inv.caphe || 0) + (SAVE.d.inv.trada || 0)) > 0 && Math.hypot(pos.x - cf.tx, pos.z - cf.tz) < 1.9) { QUEST.mark('drink'); SAVE.reward('drink', 20, 'Bạn đã mua nước và ghé bàn cà phê vỉa hè.'); }
+    };
+    return o;
+  })();
+  // ---------- pets: one animated cat and one Shiba dog (Quaternius, CC0). Wander between safe points, stop, turn before walking, can be petted ----------
+  var PETS = (function () {
+    var o = { list: [], cat: null }, V = new THREE.Vector3();
+    var heart = canvasTex(64, 64, function (g) { g.clearRect(0, 0, 64, 64); g.fillStyle = '#ff5a7a'; g.font = '52px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('♥', 32, 36); });
+    function free(x, z) {                                   // is this spot clear of trunks, posts, benches and carts?
+      for (var i = 0; i < circles.length; i++) { var c = circles[i]; if (Math.hypot(x - c.x, z - c.z) < c.r + 0.3) return false; }
+      for (i = 0; i < boxes.length; i++) { var b = boxes[i], dx = x - b.x, dz = z - b.z, lx = dx * b.c - dz * b.s, lz = dx * b.s + dz * b.c; if (Math.abs(lx) < b.hw + 0.3 && Math.abs(lz) < b.hd + 0.3) return false; }
+      return true;
+    }
+    function clear(ax, az, bxx, bz) { for (var k = 0; k <= 10; k++) { var x = ax + (bxx - ax) * k / 10, z = az + (bz - az) * k / 10; if (!free(x, z) || Math.abs(groundH(x, z) - groundH(ax, az)) > 0.25) return false; } return true; }
+    function spawn(file, height, speed, pts, label, isCat) {
+      new THREE.GLTFLoader().load('models/life/' + file + '.json', function (gltf) {
+        var root = new THREE.Group(), body = gltf.scene, lo = 1e9, hi = -1e9; root.add(body); body.updateMatrixWorld(true);
+        body.traverse(function (k) { if (k.isBone) { k.getWorldPosition(V); lo = Math.min(lo, V.y); hi = Math.max(hi, V.y); } if (k.isMesh) { k.frustumCulled = false; k.castShadow = false; FX.dyn.push(k); if (k.material) { k.material.envMapIntensity = 0.45; k.material.metalness = 0; } } });
+        if (!(hi > lo)) return;                              // scaled from the skeleton's own height, not a guessed factor
+        var sc = height / (hi - lo); body.scale.multiplyScalar(sc); body.position.y = -lo * sc;
+        var mixer = new THREE.AnimationMixer(body), clips = {}; gltf.animations.forEach(function (c) { var nm = c.name.split('|').pop(); if (!clips[nm]) clips[nm] = c; });
+        var walkA = clips.Walk ? mixer.clipAction(clips.Walk) : null, idleA = mixer.clipAction(clips.Idle || gltf.animations[0]), petA = clips.Idle_2_HeadLow ? mixer.clipAction(clips.Idle_2_HeadLow) : idleA, cur = null;
+        function play(a) { if (!a || cur === a) return; a.reset().play(); if (cur) cur.crossFadeTo(a, 0.3, false); cur = a; }
+        var sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: heart, depthWrite: false, transparent: true })); sp.scale.set(0.35, 0.35, 1); sp.position.set(0, height + 0.35, 0); sp.visible = false; root.add(sp);
+        var P = { root: root, pts: pts, target: pts[0], state: 'idle', t: 1 + Math.random() * 2, speed: speed, isCat: isCat, follow: false, heartT: 0, accA: 0 };
+        root.position.set(pts[0][0], groundH(pts[0][0], pts[0][1]), pts[0][1]); scene.add(root); play(idleA); if (typeof syncTier === 'function') syncTier();
+        P.update = function (dt) {
+          var cd = Math.hypot(camera.position.x - root.position.x, camera.position.z - root.position.z);
+          FRUST_S.center.copy(root.position); FRUST_S.radius = 1.5; var vis = cd < 8 || (cd < 150 && FRUST.intersectsSphere(FRUST_S)); root.visible = vis;
+          P.accA += dt; if (vis && (cd < 40 || P.accA > 0.2)) { mixer.update(P.accA); P.accA = 0; PF.anim++; } if (P.accA > 1) P.accA = 1;      // off-screen: animation paused; far: 5 Hz
+          if (P.heartT > 0) { P.heartT -= dt; sp.visible = P.heartT > 0; sp.position.y = height + 0.35 + (1.6 - P.heartT) * 0.12; }
+          var px = pos.x - root.position.x, pz = pos.z - root.position.z, pd = Math.hypot(px, pz);
+          if (P.state === 'pet') { P.t -= dt; var w = Math.atan2(px, pz); root.rotation.y += Math.atan2(Math.sin(w - root.rotation.y), Math.cos(w - root.rotation.y)) * Math.min(1, dt * 4); if (P.t <= 0) { P.state = 'idle'; P.t = 1.5; play(idleA); } return; }
+          if (P.follow) {                                    // the found cat keeps a short distance behind the visitor
+            if (pd > 2.2 && clear(root.position.x, root.position.z, pos.x, pos.z)) { P.target = [pos.x, pos.z]; P.state = 'walk'; } else if (pd <= 2.2) { P.state = 'idle'; play(idleA); return; }
+            if (pd > 30) { root.position.set(pos.x - 1.2, groundH(pos.x - 1.2, pos.z), pos.z); }
+          }
+          if (P.state === 'idle') {
+            P.t -= dt; if (P.t > 0) return;
+            for (var k = 0; k < 6; k++) { var c = P.pts[Math.floor(Math.random() * P.pts.length)]; if (c !== P.target && clear(root.position.x, root.position.z, c[0], c[1])) { P.target = c; P.state = 'turn'; return; } }
+            P.t = 2; return;
+          }
+          var dx = P.target[0] - root.position.x, dz = P.target[1] - root.position.z, d = Math.hypot(dx, dz), want = Math.atan2(dx, dz), diff = Math.atan2(Math.sin(want - root.rotation.y), Math.cos(want - root.rotation.y));
+          if (P.state === 'turn') { root.rotation.y += Math.max(-dt * 2.6, Math.min(dt * 2.6, diff)); if (Math.abs(diff) < 0.25) { P.state = 'walk'; play(walkA || idleA); } return; }      // turn on the spot first, then walk
+          if (pd < 0.9 && px * dx + pz * dz > 0) { play(idleA); return; }                                // the visitor is in the way: wait
+          play(walkA || idleA); root.rotation.y += diff * Math.min(1, dt * 5);
+          var st = Math.min(P.speed * (P.follow ? 1.8 : 1) * dt, d), nx = root.position.x + dx / d * st, nz = root.position.z + dz / d * st;
+          if (!free(nx, nz)) { P.state = 'idle'; P.t = 0.6; play(idleA); return; }
+          root.position.set(nx, groundH(nx, nz), nz);
+          if (d < 0.15) { P.state = 'idle'; P.t = 2 + Math.random() * 5; play(idleA); }
+        };
+        P.pet = function () {
+          P.state = 'pet'; P.t = 2.6; P.heartT = 1.6; play(petA);
+          if (isCat && SAVE.d.cat === 1) { SAVE.d.cat = 2; SAVE.store(); P.follow = true; delete NOTES.dismissed.catfound; notify('catfound', 'Đã tìm thấy mèo!', ['Mèo sẽ đi theo bạn. Hãy quay lại xe bánh mì để trả mèo cho cô chủ.']); }
+        };
+        if (isCat) { o.cat = P; if (SAVE.d.cat === 2) P.follow = true; if (SAVE.d.cat === 3) o.catHome(); }
+        o.list.push(P);
+        LIFE.add({ label: label, r: 1.7, pos: function () { return P.state === 'pet' ? null : [root.position.x, root.position.z]; }, use: P.pet });
+      });
+    }
+    o.catHome = function () {                                // after the quest the cat lives beside the café
+      var P = o.cat, st = STALLS[0]; if (!P || !st || st.tx === undefined) return; P.follow = false;
+      P.pts = [[st.tx + st.ax * 1.6, st.tz + st.az * 1.6], [st.tx - st.ax * 1.7, st.tz - st.az * 1.7], [st.x + st.ax * 2.3 + st.fx * 0.6, st.z + st.az * 2.3 + st.fz * 0.6], [st.tx - st.fx * 0.9 + st.ax * 1.2, st.tz - st.fz * 0.9 + st.az * 1.2]];
+      P.root.position.set(P.pts[0][0], groundH(P.pts[0][0], P.pts[0][1]), P.pts[0][1]); P.target = P.pts[0]; P.state = 'idle'; P.t = 1;
+    };
+    o.tick = function (dt) { for (var i = 0; i < o.list.length; i++) o.list[i].update(dt); };
+    // the cat starts on the lawn edge by the Hùng Vương-side benches; the dog roams the open paving near the park tip
+    spawn('cat', 0.36, 0.42, [[15, -11.6], [20.5, -12.4], [24, -10.6], [12, -9.6], [17.5, -9.2]], 'Vuốt ve mèo', true);
+    spawn('dog_shiba', 0.58, 0.75, [[29, 3], [33, -3.4], [26, -2.6], [36.5, 4.2], [31, 6.6], [24, 4.6]], 'Vuốt ve chó', false);
+    return o;
+  })();
+  window.__lk.LIFE = LIFE; window.__lk.PETS = PETS; window.__lk.SAVE = SAVE; window.__lk.QUEST = QUEST; window.__lk.pos = pos;
+
   var INFO = {
-    mon: ['Tượng đài Chiến thắng Long Khánh', ['12 bậc cấp tượng trưng 12 ngày đêm chiến dịch (9–21/4/1975).', 'Bệ hình chóp tam giác 9 m cộng thân tượng 12 m thành 21 m, ghi nhớ ngày 21/4/1975.']],
-    tank: ['Xe tăng số 714', ['Xe tăng trưng bày trên đảo cỏ riêng ở phía nam mũi công viên, giữa Quốc lộ 1 và đường Hùng Vương.', 'Mô hình là lưới T-54 chung được sơn và đánh số theo ảnh; chưa xác định được chính xác biến thể của xe thật.']]
+    mon: ['Tượng đài Chiến thắng Long Khánh', ['Tác giả: nhà điêu khắc Trần Thanh Thanh. Khởi công 22/12/2000, hoàn thành 15/4/2001.', 'Một nam, một nữ chiến sĩ giải phóng quân; nguyên mẫu là hai anh hùng lực lượng vũ trang Lê A và Hồ Thị Hương.', '12 bậc cấp tượng trưng 12 ngày đêm chiến dịch (9–21/4/1975). Bệ chóp 9 m cộng thân tượng 12 m thành 21 m, gợi nhớ ngày 21/4.', 'Phù điêu trong mô hình là bản diễn giải, không phải bản sao.']],
+    tank: ['Xe tăng số 714', ['Xe tăng số hiệu 714 của Trung đoàn 165, Sư đoàn 7, Quân đoàn 4, đơn vị mở màn chiến dịch Xuân Lộc - Long Khánh (theo báo Đại Đoàn Kết, 4-2025).', 'Xe trưng bày trên đảo cỏ riêng ở phía nam mũi công viên, giữa Quốc lộ 1 và đường Hùng Vương.', 'Mô hình là lưới T-54 chung được sơn và đánh số theo ảnh; chưa xác định được chính xác biến thể của xe thật.']]
   };
   function frame(now) {
     PF.begin(now); BENCH.apply();
@@ -1874,7 +2194,7 @@
       zone = z2; if (zone && !(NOTES.dismissed['info-' + zone] && Date.now() - NOTES.dismissed['info-' + zone] < COOLDOWN)) notify('info-' + zone, INFO[zone][0], INFO[zone][1]);
     }
     FRUST_M.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse); FRUST.setFromProjectionMatrix(FRUST_M); LODS.tick(dt);
-    QUEST.check();
+    QUEST.check(); LIFE.tick(dt);
     for (var pk = 0; pk < peds.length; pk++) peds[pk].update(dt);
     tickLight(dt);
     if (!NOTES.moved && Math.hypot(pos.x - START.x, pos.z - START.z) > 4) { NOTES.moved = true; closeNote('welcome', false); }      // the tips card steps aside once the player is walking

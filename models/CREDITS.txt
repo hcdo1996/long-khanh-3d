@@ -42,3 +42,17 @@ page's own code from simple shapes; no downloaded models. Riders sit on the Poly
 
 Performance pass, 16 Nov 2026: the four tree files now carry trunks reduced to about 30% of their triangles (leaves unchanged);
 statue_lod.json (13k triangles) and tank/tank714_lod.json (7k triangles) are reduced copies used at a distance. Same sources and licences as the originals.
+
+Vietnamese park life pack, added 16 Nov 2026 (models/life). Repacked from GLB to glTF JSON for the page host; geometry unchanged
+unless noted. Only the files listed here are shipped; the pack's other alternatives are not used.
+  cat - Quaternius, CC0 1.0, https://poly.pizza/m/qKICY6xla2
+  dog_shiba - Quaternius, CC0 1.0, https://poly.pizza/m/y4wdQpg767
+  smartphone - smallbigsquare, CC0 1.0, https://poly.pizza/m/4DRZmTs3jq (scale/offset normalised by the pack)
+  tourist_camera - Poly by Google, CC BY 3.0, https://poly.pizza/m/0nfSsetwy0Z (scale/offset normalised by the pack)
+  umbrella_open - Poly by Google, CC BY 3.0, https://poly.pizza/m/4uOho8GeU_w (scale/offset normalised by the pack)
+  banh_mi_cart_original, banh_mi_sandwich, ca_phe_sua_da, pho_bowl_chopsticks, plastic_stool_red, plastic_stool_blue,
+  sidewalk_cafe_table, vietnamese_coffee_phin, vietnamese_menu_board - original models made for the pack; free to use,
+  modify and redistribute, no attribution required. Sign lettering was converted from DejaVu Sans Bold into geometry.
+  CC BY 3.0: https://creativecommons.org/licenses/by/3.0/
+Scooter riders, food carts other than the bánh mì cart, Christmas lights, rain, the relief band texture and the guide's
+pennant are drawn by the page's own code. The relief band is an interpretation of the reference photos, not a copy.
