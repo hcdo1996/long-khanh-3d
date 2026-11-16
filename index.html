@@ -16,6 +16,9 @@
   #title .chip { display: inline-block; margin-top: 5px; padding: 3px 9px; border-radius: 9px; background: rgba(255,255,255,.13); font-size: 12.5px; font-weight: 700; letter-spacing: 0; font-variant-numeric: tabular-nums; }
   #shot { bottom: 22px; right: 132px; width: 46px; height: 42px; padding: 0; font-size: 19px; border-radius: 50%; }
   .note p.done { opacity: .6; text-decoration: line-through; }
+  #fps { bottom: 70px; right: 132px; width: 46px; height: 42px; padding: 0; font-size: 11px; font-weight: 700; border-radius: 50%; }
+  #perf { position: fixed; left: 10px; bottom: 160px; z-index: 5; display: none; padding: 8px 10px; font: 11.5px/1.45 ui-monospace, Menlo, Consolas, monospace; white-space: pre; pointer-events: auto; max-width: calc(100vw - 20px); overflow: hidden; }
+  #perf button { font: inherit; margin-top: 5px; margin-right: 6px; padding: 6px 9px; border: 0; border-radius: 8px; background: rgba(255,255,255,.16); color: #fff; cursor: pointer; }
   #map { position: fixed; top: 10px; right: 10px; width: 156px; height: 108px; border-radius: 12px; background: rgba(18, 28, 38, .62); pointer-events: none; }
   /* permanent controls (not notifications) */
   #bar { position: fixed; top: 126px; left: 10px; display: flex; gap: 2px; padding: 4px; max-width: calc(100vw - 20px); }
@@ -43,7 +46,7 @@
     #bar { top: 58px; max-width: calc(100vw - 190px); } #simnote { top: 104px; }
     #notes { top: 108px; right: 200px; max-height: calc(100vh - 118px); }
     #joy { width: 104px; height: 104px; bottom: 14px; }
-    #title .sub { display: none; } #title { padding: 5px 10px 6px; } #title .chip { margin-top: 2px; } #shot { bottom: 104px; right: 124px; }
+    #title .sub { display: none; } #title { padding: 5px 10px 6px; } #title .chip { margin-top: 2px; } #shot { bottom: 104px; right: 124px; } #fps { bottom: 148px; right: 124px; } #perf { bottom: 8px; left: 130px; }
     #help { bottom: 148px; } #qual { bottom: 104px; } #tank { bottom: 60px; } #home { bottom: 16px; } .btn { padding: 9px 12px; } #wx { bottom: 16px; right: 124px; } #xmas { bottom: 60px; right: 124px; }
   }
   #boot { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px; text-align: center;
@@ -69,6 +72,9 @@
 <div id="joy"><div id="knob"></div></div>
 <button id="help" class="panel btn" aria-label="Hướng dẫn và ghi công">? Trợ giúp</button>
 <button id="shot" class="panel btn" aria-label="Chụp ảnh lưu niệm">📷</button>
+<button id="fps" class="panel btn" aria-label="Bật tắt bảng hiệu năng" aria-pressed="false">FPS</button>
+<div id="perf" class="panel" role="status" aria-live="off"><span id="perftext"></span>
+<button id="benchgo" type="button">Chạy đo mức này</button><button id="benchall" type="button">Đo cả 3 mức</button></div>
 <button id="xmas" class="panel btn" aria-pressed="true">Noel: Bật</button>
 <button id="wx" class="panel btn">Thời tiết: Nắng</button>
 <button id="qual" class="panel btn">Đồ họa</button>
@@ -264,7 +270,7 @@
   var hemi = new THREE.HemisphereLight(0xcfe3ff, 0x8d8a78, 0.2); scene.add(hemi);
   var sun = new THREE.DirectionalLight(0xfff0dc, 4.0);
   sun.target.position.set(20, 0, 0); sun.position.copy(SUN_DIR).multiplyScalar(240).add(sun.target.position); scene.add(sun); scene.add(sun.target);
-  sun.castShadow = true; sun.shadow.mapSize.set(IS_TOUCH ? 2048 : 4096, IS_TOUCH ? 2048 : 4096);
+  sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);      // the top tier raises this to 4096 (setQuality)
   sun.shadow.camera.left = -115; sun.shadow.camera.right = 115; sun.shadow.camera.top = 85; sun.shadow.camera.bottom = -85;
   sun.shadow.camera.near = 20; sun.shadow.camera.far = 520; sun.shadow.bias = -0.0005; sun.shadow.normalBias = 0.05; sun.shadow.radius = 2.6;
   var sky = null;
@@ -308,6 +314,60 @@
   function bx(w, h, d, x, y, z, c, r) { return { g: new THREE.BoxGeometry(w, h, d), p: [x, y, z], c: c, r: r }; }
   function cyl(r1, r2, h, x, y, z, c, r, seg) { return { g: new THREE.CylinderGeometry(r1, r2, h, seg || 10), p: [x, y, z], c: c, r: r }; }
   function hsh(a, b) { var v = Math.sin(a * 127.1 + b * 311.7) * 43758.5453; return v - Math.floor(v); }      // fixed pseudo-random numbers that do not disturb the scene's seeded sequence
+  // ---------- level of detail: what is drawn in full depends on the graphics tier and the camera distance, never on touch detection ----------
+  var DT = [32, 70, 150], DH = [40, 80, 150], DS = [55, 110, 220], DN = [18, 30, 45];      // metres per tier (Nhẹ, Cao, Tối đa): full trees, full houses, small street props, fully animated people
+  function shareGeo(g0) { var g = new THREE.BufferGeometry(); g.index = g0.index; for (var k in g0.attributes) g.attributes[k] = g0.attributes[k]; g.groups = g0.groups; return g; }      // same GPU buffers, own bounds
+  function cullable(im) {                                 // true bounds of all instances, so frustum culling is safe for this static instanced mesh
+    var g0 = im.geometry; if (!g0.boundingSphere) g0.computeBoundingSphere();
+    var box = new THREE.Box3(), m = new THREE.Matrix4(), sp = new THREE.Sphere(), v = new THREE.Vector3();
+    for (var i = 0; i < im.count; i++) { im.getMatrixAt(i, m); sp.copy(g0.boundingSphere).applyMatrix4(m); box.expandByPoint(v.copy(sp.center).addScalar(sp.radius)); box.expandByPoint(v.copy(sp.center).addScalar(-sp.radius)); }
+    var g = shareGeo(g0); g.boundingBox = box; g.boundingSphere = box.getBoundingSphere(new THREE.Sphere()); im.geometry = g; im.frustumCulled = true; return im;
+  }
+  function mergeParts(list) {                             // [{g, color}] -> one vertex-coloured geometry
+    var P = [], Nn = [], Cc = [];
+    list.forEach(function (q) { var g = q.g.index ? q.g.toNonIndexed() : q.g; if (!g.attributes.normal) g.computeVertexNormals(); var a = g.attributes.position.array, b = g.attributes.normal.array, c = q.color; for (var i = 0; i < a.length; i += 3) { P.push(a[i], a[i + 1], a[i + 2]); Nn.push(b[i], b[i + 1], b[i + 2]); Cc.push(c.r, c.g, c.b); } });
+    var G = new THREE.BufferGeometry(); G.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); G.setAttribute('normal', new THREE.Float32BufferAttribute(Nn, 3)); G.setAttribute('color', new THREE.Float32BufferAttribute(Cc, 3)); return G;
+  }
+  var LODS = (function () {
+    var o = { trees: null, cells: [], pairs: [], acc: 1, force: true }, ZERO = new Float32Array(16), box = new THREE.Box3(), P = new THREE.Vector3();
+    function card(T, t, i, show) {
+      var c = T.cards; if (!c) return;
+      c.trunks.instanceMatrix.array.set(show ? c.mt.subarray(i * 16, i * 16 + 16) : ZERO, i * 16); c.cores.instanceMatrix.array.set(show ? c.mc.subarray(i * 16, i * 16 + 16) : ZERO, i * 16);
+      for (var k = t.ci0; k < t.ci0 + t.n; k++) c.crowns.instanceMatrix.array.set(show ? c.mr.subarray(k * 16, k * 16 + 16) : ZERO, k * 16);
+      c.trunks.instanceMatrix.needsUpdate = c.cores.instanceMatrix.needsUpdate = c.crowns.instanceMatrix.needsUpdate = true;
+    }
+    function pack(T) {
+      T.variants.forEach(function (v) {
+        if (!v.ims) return; var act = []; v.list.forEach(function (t, i) { if (t.full) act.push(i); });
+        v.ims.forEach(function (im) {
+          var a = im.instanceMatrix.array, m0 = im.userData.m0, c = im.instanceColor && im.instanceColor.array, c0 = im.userData.c0;
+          for (var j = 0; j < act.length; j++) { var i = act[j]; a.set(m0.subarray(i * 16, i * 16 + 16), j * 16); if (c && c0) c.set(c0.subarray(i * 3, i * 3 + 3), j * 3); }
+          im.count = act.length; im.visible = act.length > 0; im.instanceMatrix.needsUpdate = true; if (c) im.instanceColor.needsUpdate = true;
+          if (act.length) { box.makeEmpty(); act.forEach(function (i) { var t = v.list[i]; box.expandByPoint(P.set(t.x - 9, t.y0 - 1, t.z - 9)); box.expandByPoint(P.set(t.x + 9, t.y0 + 17, t.z + 9)); }); im.geometry.boundingSphere = box.getBoundingSphere(im.geometry.boundingSphere || new THREE.Sphere()); im.frustumCulled = true; }
+        });
+      });
+    }
+    o.tick = function (dt) {
+      o.acc += dt; if (o.acc < 0.25 && !o.force) return; o.acc = 0; o.force = false;
+      var cx = camera.position.x, cz = camera.position.z, d, T = o.trees;
+      if (T && T.ready) {
+        var ch = false, lim = DT[tier];
+        T.list.forEach(function (t, i) { d = Math.hypot(t.x - cx, t.z - cz); var full = t.hasModel && d < lim + (t.full ? 5 : 0); if (full !== !!t.full) { t.full = full; card(T, t, i, !full); ch = true; } });
+        if (ch) pack(T);
+      }
+      o.cells.forEach(function (c) {
+        d = Math.hypot(c.cx - cx, c.cz - cz) - c.rad; var full = d < DH[tier] + (c.isFull ? 6 : 0), small = d < DS[tier];
+        c.isFull = full; for (var i = 0; i < c.full.length; i++) c.full[i].visible = full; for (i = 0; i < c.lite.length; i++) c.lite[i].visible = !full; for (i = 0; i < c.small.length; i++) c.small[i].visible = small;
+      });
+      o.pairs.forEach(function (q) {
+        d = Math.hypot(q.x - cx, q.z - cz); var far = d > q.d[tier] + (q.far ? -4 : 4);
+        if (far && !q.lo && !q.loading) { q.loading = true; new THREE.GLTFLoader().load(q.url, function (gltf) { var lo = gltf.scene, mat = null; q.hi.traverse(function (k) { if (k.isMesh && !mat) mat = k.material; }); lo.traverse(function (k) { if (k.isMesh) { k.material = mat; k.castShadow = true; k.receiveShadow = true; } }); lo.position.copy(q.hi.position); lo.rotation.copy(q.hi.rotation); lo.scale.copy(q.hi.scale); lo.visible = false; q.hi.parent.add(lo); q.lo = lo; o.force = true; }); }
+        q.far = far; if (q.lo) { q.lo.visible = far; q.hi.visible = !far; }
+      });
+    };
+    return o;
+  })();
+  var FRUST = new THREE.Frustum(), FRUST_M = new THREE.Matrix4(), FRUST_S = new THREE.Sphere();
   var LAMP_C = [], GLOWS = [];                                                   // every glowing point: lamp halos (kind 0, night only) and Christmas bulbs (kind 1, twinkle)
   function glow(x, y, z, hex, size, kind) { var c = new THREE.Color(hex); GLOWS.push(x, y, z, c.r, c.g, c.b, size, GLOWS.length * 0.137 % 1 + Math.floor(GLOWS.length / 9) % 5, kind); }
   var XMAS = [0xff3b30, 0x34d058, 0xffc83d, 0x3b9bff, 0xfff1c9], VERT_MAT = null;
@@ -483,6 +543,7 @@
       m.traverse(function (k) { if (k.isMesh) { k.material = mat; k.castShadow = true; k.receiveShadow = true; } });
       m.scale.setScalar(SCULPT_SCALE); m.position.set(M.x, TY + PYR.H, M.z);
       scene.remove(g); scene.remove(pl); scene.add(m);
+      LODS.pairs.push({ hi: m, lo: null, url: 'models/statue_lod.json', x: M.x, z: M.z, d: [30, 70, 160] });      // a 13k-triangle version takes over at a distance
       if (typeof renderer !== 'undefined' && renderer) renderer.shadowMap.needsUpdate = true;
     });
   })();
@@ -563,6 +624,7 @@
       m.traverse(function (k) { if (k.isMesh) { k.material = paint; k.castShadow = true; k.receiveShadow = true; if (/turret/i.test(k.name) || (k.parent && /turret/i.test(k.parent.name))) turret = k; } });
       m.rotation.y = Math.PI / 2; m.position.set(1.12, 0, 0);            // model faces +z; the hull centre sits 1.12 m behind its origin
       g.remove(t); var holder = new THREE.Group(); holder.position.y = 0.8; holder.add(m); g.add(holder); g.updateMatrixWorld(true);
+      LODS.pairs.push({ hi: m, lo: null, url: 'models/tank/tank714_lod.json', x: TANK.x, z: TANK.z, d: [22, 45, 100] });
       if (turret) {                                                       // project the markings onto the turret's right side
         var fw = new THREE.Vector3(1, 0, 0).applyQuaternion(g.getWorldQuaternion(new THREE.Quaternion())), rt = new THREE.Vector3(-fw.z, 0, fw.x), ray = new THREE.Raycaster();
         var base = new THREE.Vector3(1.12, 0, 0); g.localToWorld(base); base.y = g.position.y + 0.8;
@@ -606,7 +668,7 @@
     for (var t = 20; t < QL1.len - 60; t += rr(8, 13)) for (var row = 0; row < 2; row++) {
       var off = QL1.w / 2 + 7 + row * 13 + rr(-2, 2); tree(QL1.ax + QL1.ux * t + QL1.nx * off, QL1.az + QL1.uz * t + QL1.nz * off, rr(5, 7.5), rr(5, 8), 0, true);
     }
-    kind = IS_TOUCH ? '' : 'row';                 // street trees stay as leaf cards on phones to hold the triangle budget
+    kind = 'row';                                  // street trees: models near the camera, leaf cards beyond the tier distance (same on every device)
     for (t = 200; t < HV.len - 70; t += rr(16, 24)) { var o2 = HV.w / 2 + 2.2; if (Math.abs(HV.ax + HV.ux * t) < 200) tree(HV.ax + HV.ux * t + HV.nx * o2, HV.az + HV.uz * t + HV.nz * o2, rr(3, 3.8), rr(2, 2.6), 0, true); }
     // foliage = a dark core plus many leaf cards cut out by an alpha texture
     var leafTex = canvasTex(256, 256, function (g, w, h) {
@@ -621,7 +683,7 @@
     kind = '';
     var o = new THREE.Object3D(), col = new THREE.Color();
     function cardTrees(T) {
-    var n = T.length, cards = 0; if (!n) return;
+    var n = T.length, cards = 0; if (!n) return null;
     T.forEach(function (t) { t.n = t.r > 4.5 ? 64 : 40; cards += t.n; });
     var trunks = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.15, 0.3, 1, 12), lam(0x77593d, { map: rep(T_BARK, 2, 2), bumpMap: rep(T_BARK, 2, 2), bumpScale: 0.04 }), n);
     var cores = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 16, 12), lam(0x2c5527, { map: rep(T_GRASS, 3, 2) }), n);
@@ -629,7 +691,7 @@
     var crowns = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), leafMat, cards), ci = 0;
     crowns.customDepthMaterial = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: leafTex, alphaTest: 0.4 });
     T.forEach(function (t, i) {
-      var k = t.r > 4.5 ? 1.7 : 1, cy = t.y0 + t.h + t.r * 0.5, hue = rr(0.22, 0.33), sat = rr(0.2, 0.45), li = rr(0.62, 0.9);
+      var k = t.r > 4.5 ? 1.7 : 1, cy = t.y0 + t.h + t.r * 0.5, hue = rr(0.22, 0.33), sat = rr(0.2, 0.45), li = rr(0.62, 0.9); t.ci0 = ci;
       o.rotation.set(0, rnd() * 6.28, 0); o.position.set(t.x, t.y0 + (t.h + t.r * 0.3) / 2, t.z); o.scale.set(k, t.h + t.r * 0.3, k); o.updateMatrix(); trunks.setMatrixAt(i, o.matrix);
       o.position.set(t.x, cy, t.z); o.scale.set(t.r * 0.5, t.r * 0.4, t.r * 0.5); o.updateMatrix(); cores.setMatrixAt(i, o.matrix);
       for (var c = 0; c < t.n; c++) {
@@ -640,31 +702,37 @@
       }
     });
     [trunks, cores, crowns].forEach(function (m) { m.castShadow = true; m.receiveShadow = true; scene.add(m); });
+    return { trunks: trunks, cores: cores, crowns: crowns, mt: trunks.instanceMatrix.array.slice(), mc: cores.instanceMatrix.array.slice(), mr: crowns.instanceMatrix.array.slice() };
     }
     cardTrees(T);
+    var seedKeep = seed, NCARDS = cardTrees(NEAR); seed = seedKeep;      // leaf-card stand-ins for the model trees (drawn when a tree is beyond the detail distance); the scene's seeded sequence is left untouched
+    LODS.trees = { ready: false, variants: [], cards: NCARDS, list: NEAR };
     (function () {       // Quaternius trees (CC0): each file is split into individual trees, then instanced with varied height, turn and leaf tint
-      if (!THREE.GLTFLoader) { cardTrees(NEAR); return; }
+      if (!THREE.GLTFLoader) return;
       var files = ['broadleaf_a', 'broadleaf_b', 'broadleaf_c', 'tree_cluster'], left = files.length, variants = [], loader = new THREE.GLTFLoader();
       function finish() {
         if (--left) return;
         var park = variants.filter(function (v) { return v.park; }), row = variants.filter(function (v) { return !v.park; });
-        if (!park.length && !row.length) { cardTrees(NEAR); return; }
+        if (!park.length && !row.length) return;
         if (!park.length) park = row; if (!row.length) row = park;
         NEAR.forEach(function (t, i) { var set = t.kind === 'park' ? park : row; set[(i * 7 + Math.floor(rnd() * 3)) % set.length].list.push(t); });
         var M4 = new THREE.Matrix4(), q = new THREE.Quaternion(), P = new THREE.Vector3(), S = new THREE.Vector3(), UPV = new THREE.Vector3(0, 1, 0), c = new THREE.Color();
         variants.forEach(function (v) {
           if (!v.list.length) return;
           v.parts.forEach(function (part) {
-            var im = new THREE.InstancedMesh(part.geo, part.mat, v.list.length); im.frustumCulled = false; im.castShadow = true; im.receiveShadow = true;
+            var im = new THREE.InstancedMesh(shareGeo(part.geo), part.mat, v.list.length); im.frustumCulled = false; im.castShadow = true; im.receiveShadow = true; (v.ims = v.ims || []).push(im);
             if (part.leaf) im.customDepthMaterial = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: part.mat.map, alphaTest: 0.5 });
             v.list.forEach(function (t, i) {
               if (!t.s) { t.s = (t.h + t.r * 1.45) / v.H; t.a = rnd() * 6.283; t.tint = rr(0.82, 1); }
               P.set(t.x, t.y0 - v.minY * t.s - 0.06, t.z); q.setFromAxisAngle(UPV, t.a); S.set(t.s, t.s, t.s); M4.compose(P, q, S).multiply(v.base); im.setMatrixAt(i, M4);
               if (part.leaf) { c.setRGB(t.tint * rr(0.92, 1), t.tint, t.tint * rr(0.8, 0.95)); im.setColorAt(i, c); }
             });
+            im.userData.m0 = im.instanceMatrix.array.slice(); if (im.instanceColor) im.userData.c0 = im.instanceColor.array.slice(); im.count = 0; im.visible = false;
             scene.add(im);
           });
+          v.list.forEach(function (t) { t.hasModel = true; });
         });
+        LODS.trees.variants = variants; LODS.trees.ready = true; LODS.force = true;
         if (typeof renderer !== 'undefined' && renderer) renderer.shadowMap.needsUpdate = true;
       }
       files.forEach(function (f, fi) {
@@ -762,7 +830,7 @@
       }
     }
     row(HV, 1, 9, 24, 6, 13); row(HV, -1, 6, 14, 5, 9); row(QL1, -1, 6, 14, 5, 9); row(BACKST, 1, 6, 15, 5, 10); row(MERGED, 1, 6, 15, 5, 10); row(MERGED, -1, 6, 18, 5, 10);
-    var SHOPS = []; list.forEach(function (b) { if (Math.hypot(b.x - 10, b.z) < (IS_TOUCH ? 105 : 150)) { b.shop = true; SHOPS.push(b); } });      // the plots nearest the park get the imported shophouse models instead of a plain box (fewer on phones: each house is about 3,000 triangles)
+    var SHOPS = []; list.forEach(function (b) { if (Math.hypot(b.x - 10, b.z) < 150) { b.shop = true; SHOPS.push(b); } });      // the plots nearest the park get the imported shophouse models instead of a plain box (fewer on phones: each house is about 3,000 triangles)
     var rf = lam(0xa9a297, { map: rep(T_STONE, 2, 2) }), o = new THREE.Object3D(), col = new THREE.Color(), groups = { 2: [], 3: [], 5: [] };
     list.forEach(function (b) { groups[b.h < 9 ? 2 : (b.h < 15 ? 3 : 5)].push(b); boxes.push({ x: b.x, z: b.z, c: Math.cos(b.th), s: Math.sin(b.th), hw: b.w / 2, hd: DEPTH / 2, h: b.h }); });
     [2, 3, 5].forEach(function (fl) {
@@ -797,7 +865,8 @@
       // generic Vietnamese shop words with their accents; none is the name of a real business. They replace the unaccented mesh lettering of the models.
       var LABELS = [['CÀ PHÊ', 'TRÀ - CÀ PHÊ', 'GIẢI KHÁT'], ['TẠP HÓA', 'VĂN PHÒNG PHẨM', 'TIỆM SÁCH'], ['BÁNH MÌ', 'TIỆM BÁNH', 'PHỞ - HỦ TIẾU'], ['NHÀ PHỐ', 'MAY ĐO', 'CẮT TÓC']];
       function hsh(a, b) { var v = Math.sin(a * 127.1 + b * 311.7) * 43758.5453; return v - Math.floor(v); }
-      var units = [[], [], [], []], all = [], alleys = [], scoot = [[], [], []], FRONT = DEPTH / 2 - 1.25, last = -1;
+      var units = [[], [], [], []], all = [], alleys = [], scoot = [[], [], []], FRONT = DEPTH / 2 - 1.25, last = -1, CELLS = {};
+      function cellOf(x, z) { var k = Math.floor(x / 60) + ',' + Math.floor(z / 60), c = CELLS[k]; if (!c) { c = CELLS[k] = { units: [[], [], [], []], scoot: [[], [], []], full: [], lite: [], small: [], cx: Math.floor(x / 60) * 60 + 30, cz: Math.floor(z / 60) * 60 + 30, rad: 42 }; LODS.cells.push(c); } return c; }
       SHOPS.forEach(function (b, bi) {
         var ax = Math.cos(b.th), az = -Math.sin(b.th), n = Math.max(1, Math.floor(b.w / 4.25)), sc = Math.min(1.25, b.w / (5 * n)), gap = b.w - 5 * n * sc, gapFirst = hsh(bi, 9) < 0.5;
         var yaw = Math.atan2(b.fx, b.fz);
@@ -805,7 +874,7 @@
         for (var k = 0; k < n; k++) {
           var along = -b.w / 2 + (gapFirst ? gap : 0) + sc * 5 * (k + 0.5), t = Math.floor(hsh(bi, k) * 4); if (b.h >= 15 && hsh(bi, k + 40) < 0.5) t = 1; if (t === last) t = (t + 1) % 4; last = t;
           var u = { x: b.x + ax * along + b.fx * FRONT, z: b.z + az * along + b.fz * FRONT, yaw: yaw, s: sc, h1: hsh(bi, k + 11), h2: hsh(bi, k + 23), row: t * 3 + Math.floor(hsh(bi, k + 31) * 3), fx: b.fx, fz: b.fz, ax: ax, az: az };
-          units[t].push(u); all.push(u);
+          units[t].push(u); all.push(u); cellOf(u.x, u.z).units[t].push(u);
           FX.pools.push([u.x + b.fx * 2.2, u.z + b.fz * 2.2, 8.5]);                                     // warm light spilling from the shopfront at night
           if (hsh(bi, k + 100) < 0.68) for (var e = 0; e < 13; e++) { var lx = (-2.2 + e * 4.4 / 12) * sc; glow(u.x + b.fz * lx + b.fx * 1.08, 4.32 - 0.1 * Math.sin(e / 12 * Math.PI), u.z - b.fx * lx + b.fz * 1.08, XMAS[(e + bi) % 5], 0.3, 1); }      // Christmas string on the first balcony
           if (hsh(bi, k + 101) < 0.4) for (e = 0; e < 11; e++) { lx = (-2.3 + e * 0.46) * sc; glow(u.x + b.fz * lx + b.fx * 1.3, 2.24, u.z - b.fx * lx + b.fz * 1.3, e % 2 ? 0xfff1c9 : 0xffc83d, 0.26, 1); }                                   // and along some awnings
@@ -815,29 +884,39 @@
           if (hsh(bi, k + 50) < 0.5) for (var q = 0, m = 1 + Math.floor(hsh(bi, k + 51) * 3); q < m; q++) {
             var lat = (-1.5 + q * 0.85 + (hsh(bi, k + 52) < 0.5 ? 0 : 1.2)) * sc, dist = 1.5 + 0.2 * hsh(bi, k + 60 + q), sx = u.x + ax * lat + b.fx * dist, sz = u.z + az * lat + b.fz * dist;
             var pick = hsh(bi, k * 7 + q + 70), mi = pick < 0.45 ? 0 : (pick < 0.85 ? 1 : 2);
-            scoot[mi].push({ x: sx, z: sz, yaw: yaw + (hsh(bi, q + 80) < 0.7 ? Math.PI : 0) + (hsh(bi, q + 90) - 0.5) * 0.24 }); circles.push({ x: sx, z: sz, r: 0.55, h: 1.1 });
+            var sco = { x: sx, z: sz, yaw: yaw + (hsh(bi, q + 80) < 0.7 ? Math.PI : 0) + (hsh(bi, q + 90) - 0.5) * 0.24 }; scoot[mi].push(sco); cellOf(sx, sz).scoot[mi].push(sco); circles.push({ x: sx, z: sz, r: 0.55, h: 1.1 });
           }
         }
       });
       var gl = new THREE.GLTFLoader(), d = new THREE.Object3D(), c2 = new THREE.Color();
       function done() { if (renderer) renderer.shadowMap.needsUpdate = true; }
+      var HOUSE_MAT = lam(0xffffff, { vertexColors: true, roughness: 0.85 }), GLASS_MAT = null;
       TYPES.forEach(function (name, ti) {
-        var arr = units[ti]; if (!arr.length) return;
+        if (!units[ti].length) return;
         gl.load('models/buildings/' + name + '.json', function (gltf) {
           gltf.scene.updateMatrixWorld(true);
+          var fullP = [], liteP = [], glassG = null;
           gltf.scene.traverse(function (m) {
             if (!m.isMesh || m.material.name === 'lettering') return;          // the unaccented mesh text is left out; accented signs are drawn below
             var g = m.geometry.clone(); g.applyMatrix4(m.matrixWorld);
-            var mat = m.material; mat.envMapIntensity = 0.45;
-            var im = new THREE.InstancedMesh(g, mat, arr.length);
-            if (mat.name === 'window_glass') { mat.roughness = 0.12; mat.metalness = 0.35; glassGlow(mat); FX.glass.push(mat); var sd = new Float32Array(arr.length); arr.forEach(function (u, i) { sd[i] = u.h1 * 7 + u.h2; }); g.setAttribute('aSeed', new THREE.InstancedBufferAttribute(sd, 1)); }
-            arr.forEach(function (u, i) {
-              d.position.set(u.x, 0.02, u.z); d.rotation.set(0, u.yaw, 0); d.scale.set(u.s, 1, 1); d.updateMatrix(); im.setMatrixAt(i, d.matrix);
-              if (mat.name === 'plaster') { var v = 0.84 + 0.32 * u.h1, tw = 0.1 * (u.h2 - 0.5); c2.setRGB(v * (1 + tw), v, v * (1 - tw)); im.setColorAt(i, c2); }      // modest plaster variation
-            });
-            im.castShadow = im.receiveShadow = true; im.frustumCulled = false; scene.add(im);
+            if (m.material.name === 'window_glass') { glassG = g; if (!GLASS_MAT) { GLASS_MAT = m.material; GLASS_MAT.envMapIntensity = 0.45; GLASS_MAT.roughness = 0.12; GLASS_MAT.metalness = 0.35; glassGlow(GLASS_MAT); FX.glass.push(GLASS_MAT); } return; }
+            var part = { g: g, color: m.material.color }; fullP.push(part); if (m.material.name !== 'frames' && m.material.name !== 'metal') liteP.push(part);      // the lite house drops window frames, balusters and rails
           });
-          done();
+          var fullG = mergeParts(fullP), liteG = mergeParts(liteP);
+          LODS.cells.forEach(function (cell) {
+            var arr = cell.units[ti]; if (!arr.length) return;
+            function inst(geo, mat, tint) {
+              var im = new THREE.InstancedMesh(shareGeo(geo), mat, arr.length);
+              arr.forEach(function (u, i) {
+                d.position.set(u.x, 0.02, u.z); d.rotation.set(0, u.yaw, 0); d.scale.set(u.s, 1, 1); d.updateMatrix(); im.setMatrixAt(i, d.matrix);
+                if (tint) { var v = 0.84 + 0.32 * u.h1, tw = 0.1 * (u.h2 - 0.5); c2.setRGB(v * (1 + tw), v, v * (1 - tw)); im.setColorAt(i, c2); }      // modest colour variation per house
+              });
+              im.castShadow = im.receiveShadow = true; cullable(im); scene.add(im); return im;
+            }
+            var f = inst(fullG, HOUSE_MAT, true), l = inst(liteG, HOUSE_MAT, true); l.visible = false; cell.full.push(f); cell.lite.push(l);
+            if (glassG) { var gi = inst(glassG, GLASS_MAT, false), sd = new Float32Array(arr.length); arr.forEach(function (u, i) { sd[i] = u.h1 * 7 + u.h2; }); gi.geometry.setAttribute('aSeed', new THREE.InstancedBufferAttribute(sd, 1)); }
+          });
+          LODS.force = true; done();
         });
       });
       // accented signs: one texture atlas, one instanced draw call
@@ -856,25 +935,28 @@
         al.frustumCulled = false; scene.add(al);
       }
       ['scooter_s1pierro', 'scooter_google', 'scooter_minipoly'].forEach(function (name, si) {
-        var arr = scoot[si]; if (!arr.length) return;
+        if (!scoot[si].length) return;
         gl.load('models/scooters/' + name + '.json', function (gltf) {
           var root = gltf.scene, junk = []; root.traverse(function (m) { if (m.name === 'Cube') junk.push(m); }); junk.forEach(function (m) { m.parent.remove(m); });      // a stray default cube in one source file
           root.updateMatrixWorld(true);
           var bb = new THREE.Box3().setFromObject(root), sz = bb.getSize(new THREE.Vector3()), ct = bb.getCenter(new THREE.Vector3()), k = 1.85 / Math.max(sz.x, sz.z);      // uniform scale to a 1.85 m scooter; proportions untouched
           var N = new THREE.Matrix4().makeScale(k, k, k).multiply(new THREE.Matrix4().makeTranslation(-ct.x, -bb.min.y, -ct.z));
           if (sz.x > sz.z) N.premultiply(new THREE.Matrix4().makeRotationY(Math.PI / 2));
-          root.traverse(function (m) {
-            if (!m.isMesh) return; var g = m.geometry.clone(); g.applyMatrix4(m.matrixWorld); g.applyMatrix4(N);
-            m.material.envMapIntensity = 0.45; if (m.material.emissiveMap) m.material.emissiveIntensity = 0.5;
-            if (name !== 'scooter_s1pierro') {                                                         // single-mesh scooters are also ridden in traffic: turn the handlebar end to +x
-              var bg = g.clone(), pa = bg.attributes.position, top = -1, tz = 0; for (var vi = 0; vi < pa.count; vi++) if (pa.getY(vi) > top) { top = pa.getY(vi); tz = pa.getZ(vi); }
-              bg.rotateY(tz >= 0 ? Math.PI / 2 : -Math.PI / 2); BIKES.attach(bg, m.material);
-            }
-            var im = new THREE.InstancedMesh(g, m.material, arr.length);
+          var parts = [];
+          root.traverse(function (m) { if (!m.isMesh) return; var g = m.geometry.clone(); g.applyMatrix4(m.matrixWorld); g.applyMatrix4(N); m.material.envMapIntensity = 0.45; if (m.material.emissiveMap) m.material.emissiveIntensity = 0.5; parts.push({ g: g, color: m.material.color, mat: m.material }); });
+          if (!parts.length) return;
+          var geo = parts.length > 1 ? mergeParts(parts) : parts[0].g, mat = parts.length > 1 ? lam(0xffffff, { vertexColors: true, roughness: 0.6 }) : parts[0].mat;       // the many-part scooter becomes one vertex-coloured mesh: one draw call per group
+          if (parts.length === 1) {                                                                  // single-mesh scooters are also ridden in traffic: turn the handlebar end to +x
+            var bg = geo.clone(), pa = bg.attributes.position, top = -1, tz = 0; for (var vi = 0; vi < pa.count; vi++) if (pa.getY(vi) > top) { top = pa.getY(vi); tz = pa.getZ(vi); }
+            bg.rotateY(tz >= 0 ? Math.PI / 2 : -Math.PI / 2); BIKES.attach(bg, mat);
+          }
+          LODS.cells.forEach(function (cell) {
+            var arr = cell.scoot[si]; if (!arr.length) return;
+            var im = new THREE.InstancedMesh(shareGeo(geo), mat, arr.length);
             arr.forEach(function (u, i) { d.position.set(u.x, 0.06, u.z); d.rotation.set(0, u.yaw, 0); d.scale.set(1, 1, 1); d.updateMatrix(); im.setMatrixAt(i, d.matrix); });
-            im.castShadow = im.receiveShadow = true; im.frustumCulled = false; scene.add(im);
+            im.castShadow = im.receiveShadow = true; cullable(im); scene.add(im); cell.small.push(im);
           });
-          done();
+          LODS.force = true; done();
         });
       });
       // --- street-food carts, hand-built from simple shapes (not downloaded models): cart, glass case, roof, sign, table and stools ---
@@ -1070,8 +1152,17 @@
       var p0 = moving ? pts[0] : spec.at; root.position.set(p0[0], groundH(p0[0], p0[1]), p0[1]);
       if (!moving) root.rotation.y = Math.atan2(spec.look[0] - p0[0], spec.look[1] - p0[1]);
       scene.add(root);
+      var accA = 0, accM = 0;
       peds.push({ root: root, update: function (dt) {
-        mixer.update(dt); if (!moving) return;
+        var cd = Math.hypot(camera.position.x - root.position.x, camera.position.z - root.position.z), near = DN[tier];
+        FRUST_S.center.copy(root.position); FRUST_S.center.y += 0.9; FRUST_S.radius = 2.4;
+        var vis = cd < 10 || (cd < 260 && FRUST.intersectsSphere(FRUST_S)); root.visible = vis;      // tested by hand with a generous sphere; the skinned meshes themselves are not auto-culled
+        accA += dt; accM += dt;
+        if (vis && (cd < near || accA >= (cd < near * 2.2 ? 0.1 : 0.3))) { mixer.update(accA); accA = 0; PF.anim++; }      // nearby: every frame; further away 10 Hz, then 3 Hz; unseen: paused
+        if (accA > 1) accA = 1;
+        if (!moving) return;
+        if (cd > near * 2.2 && accM < 0.25) return;                                                  // distant walkers advance four times a second
+        dt = accM; accM = 0;
         var dx = pts[target][0] - root.position.x, dz = pts[target][1] - root.position.z, d = Math.hypot(dx, dz);
         if (d < 0.05) { target = (target + 1) % pts.length; return; }
         var ax = pos.x - root.position.x, az = pos.z - root.position.z, ad = Math.hypot(ax, az), block = ad < 1.5 && (ax * dx + az * dz) > 0;      // the player is close and in the way: stop and wait
@@ -1138,9 +1229,10 @@
   $('view').appendChild(renderer.domElement);
   var camera = new THREE.PerspectiveCamera(62, 1, 0.3, 1600);
   // post-processing (top tier only): bloom for lamps, lit windows and sunlit stone; then a grade + vignette pass that also writes sRGB
-  var POST = { on: false, composer: null, bloom: null };
-  (function () {
-    if (!(THREE.EffectComposer && THREE.RenderPass && THREE.ShaderPass && THREE.UnrealBloomPass)) return;
+  var POST = { on: false, composer: null, bloom: null, failed: false };
+  POST.ensure = function () {                       // built the first time the top tier is selected, not at start-up
+    if (POST.composer || POST.failed) return !!POST.composer;
+    if (!(THREE.EffectComposer && THREE.RenderPass && THREE.ShaderPass && THREE.UnrealBloomPass)) { POST.failed = true; return false; }
     try {
       var w = window.innerWidth, h = window.innerHeight, rt = renderer.capabilities.isWebGL2 && THREE.WebGLMultisampleRenderTarget
         ? new THREE.WebGLMultisampleRenderTarget(w, h, { format: THREE.RGBAFormat }) : new THREE.WebGLRenderTarget(w, h, { format: THREE.RGBAFormat });
@@ -1156,8 +1248,9 @@
           '  vec2 q = vUv - 0.5; c *= 1.0 - uVig * dot( q, q ) * 1.5;',
           '  c = mix( c * 12.92, 1.055 * pow( c, vec3( 1.0 / 2.4 ) ) - 0.055, step( 0.0031308, c ) );', '  gl_FragColor = vec4( c, 1.0 );', '}'].join('\n')
       }));
-    } catch (e) { POST.composer = null; POST.bloom = null; }
-  })();
+    } catch (e) { POST.composer = null; POST.bloom = null; POST.failed = true; }
+    return !!POST.composer;
+  };
   function resize() {
     var w = window.innerWidth, h = window.innerHeight; renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix();
     if (POST.composer) { POST.composer.setPixelRatio(renderer.getPixelRatio()); POST.composer.setSize(w, h); }
@@ -1402,7 +1495,7 @@
     FX.glass.forEach(function (m) { m.envMapIntensity = 0.45 * (1 - 0.85 * n); });                                    // night: the glass stops mirroring a bright sky
     if (FX.shopMat) FX.shopMat.emissive.setRGB(1, 0.76, 0.42).multiplyScalar(sstep(0.3, 0.9, n) * 2.4);
     NIGHT.poolMat.opacity = sstep(0.3, 0.9, n) * 0.5;
-    NIGHT.lights.forEach(function (l) { l[0].intensity = sstep(0.3, 0.9, n) * l[1]; });
+    NIGHT.lights.forEach(function (l, i) { l[0].intensity = sstep(0.3, 0.9, n) * l[1]; l[0].visible = l[0].intensity > 0.001 && (tier > 0 || i < 2 || i === NIGHT.lights.length - 1); });
     BIRDS.forEach(function (b) { b.g.visible = b.perched || (n < 0.5 && WX.rain < 0.5); });                                    // the doves on the ground leave at night
     if (dir.angleTo(DAY.shadowDir) > 0.012 && clock - DAY.shadowT > 0.3) { DAY.shadowDir.copy(dir); DAY.shadowT = clock; renderer.shadowMap.needsUpdate = true; }
     DAY.applied = h;
@@ -1532,27 +1625,44 @@
   $('home').addEventListener('click', function () { goHome(); this.blur(); });
   $('tank').addEventListener('click', function () { place(73.5, 12.7, TANK.x, TANK.z); camPitch = 0.4; this.blur(); });       // stands on the island paving, on the side that carries the number
   // quality tiers: 2 "Tối đa" = live shadows for people and cars + post-processing; 1 "Cao" = baked shadows, no post; 0 "Nhẹ" = no shadows, lower resolution
-  var TIER_NAMES = ['Nhẹ', 'Cao', 'Tối đa'], tier = IS_TOUCH ? 1 : 2, hiQ = true, PERF = { n: 0, sum: 0, done: false, lastT: 0 };
+  var TIER_NAMES = ['Nhẹ', 'Cao', 'Tối đa'], tier = 1, hiQ = true;
   function syncTier() {
     var live = tier === 2; FX.dyn.forEach(function (m) { m.castShadow = live; }); FX.blobs.forEach(function (m) { m.visible = !live; });
   }
-  function setQuality(t, save) {
-    tier = Math.max(0, Math.min(2, t)); if (tier === 2 && !POST.composer && IS_TOUCH) tier = 1; hiQ = tier > 0;
-    sun.castShadow = hiQ; renderer.shadowMap.autoUpdate = tier === 2; renderer.shadowMap.needsUpdate = true; POST.on = tier === 2 && !!POST.composer; syncTier();
-    renderer.setPixelRatio(hiQ ? Math.min(window.devicePixelRatio || 1, 2) : 1); resize(); DAY.applied = -1;
-    $('qual').textContent = 'Đồ họa: ' + TIER_NAMES[tier];
-    if (save) { PERF.done = true; try { localStorage.setItem('lk-quality', String(tier)); } catch (e) {} }
-  }
-  $('qual').addEventListener('click', function () { setQuality(tier === 0 ? 2 : tier - 1, true); this.blur(); });
-  (function () { var q = null; try { q = localStorage.getItem('lk-quality'); } catch (e) {} var t = q === 'lo' ? 0 : q === 'hi' ? 1 : q === null ? tier : +q; if (!(t >= 0 && t <= 2)) t = tier; if (q !== null) PERF.done = true; setQuality(t, false); })();
-  function perfWatch(now) {            // after loading, time 100 frames; below ~20 frames a second the page steps down one tier, says so, and measures again
-    if (PERF.done || !LOAD.closed || window.__noAutoQ) { PERF.lastT = now; return; }
-    var d = now - PERF.lastT; PERF.lastT = now; if (d > 0 && d < 1000) { PERF.sum += d; PERF.n++; }
-    if (PERF.n >= 100) {
-      if (tier > 0 && PERF.sum / PERF.n > 50) { setQuality(tier - 1, false); notify('perf', 'Đã giảm đồ họa xuống "' + TIER_NAMES[tier] + '"', ['Thiết bị chạy chậm nên trang đã tự giảm một mức đồ họa. Bạn có thể đổi lại bằng nút "Đồ họa".']); PERF.n = 0; PERF.sum = 0; if (tier === 0) PERF.done = true; }
-      else PERF.done = true;
+  // Auto: adaptive resolution first, then the tier. Sustained thresholds, a cooldown after every change, and a lock after stepping down so it does not flip back and forth.
+  var AUTOQ = { on: true, scale: 1, acc: 0, n: 0, slow: 0, fast: 0, cool: 0, upLock: 0, ceil: 2, upAt: 0, told: false };
+  AUTOQ.reset = function () { AUTOQ.scale = 1; AUTOQ.acc = AUTOQ.n = AUTOQ.slow = AUTOQ.fast = 0; AUTOQ.cool = performance.now() + 4000; AUTOQ.upLock = 0; AUTOQ.ceil = 2; };
+  AUTOQ.watch = function (d) {
+    if (!AUTOQ.on || !LOAD.closed || BENCH.on || window.__noAutoQ || document.hidden || d > 4000) { AUTOQ.acc = AUTOQ.n = 0; return; }      // a stall longer than four seconds is a paused tab, not a slow frame
+    AUTOQ.acc += d; AUTOQ.n++; if (AUTOQ.acc < 2000) return;
+    var avg = AUTOQ.acc / AUTOQ.n, now = performance.now(); AUTOQ.acc = AUTOQ.n = 0; if (now < AUTOQ.cool) return;
+    if (avg > 40) { AUTOQ.slow++; AUTOQ.fast = 0; } else if (avg < 21) { AUTOQ.fast++; AUTOQ.slow = 0; } else { AUTOQ.slow = AUTOQ.fast = 0; }      // 40 ms = 25 frames a second, 21 ms = about 48
+    if (AUTOQ.slow >= 3) {                                  // six seconds below 25 fps
+      AUTOQ.slow = 0; AUTOQ.cool = now + 6000; AUTOQ.upLock = now + 120000;
+      if (now - AUTOQ.upAt < 30000 && tier > 0) AUTOQ.ceil = tier - 1;       // the last step up did not hold: do not try that tier again this session
+      if (AUTOQ.scale > 0.67) { AUTOQ.scale = Math.max(0.66, AUTOQ.scale - 0.17); applyPR(); }
+      else if (tier > 0) { AUTOQ.scale = 0.83; setQuality(tier - 1, false); if (!AUTOQ.told) { AUTOQ.told = true; notify('perf', 'Đồ họa tự động đã giảm xuống "' + TIER_NAMES[tier] + '"', ['Thiết bị chạy dưới 25 khung hình/giây nên trang giảm độ phân giải rồi giảm một mức đồ họa.', 'Bấm nút "Đồ họa" để tự chọn mức cố định.']); } }
+      label();
+    } else if (AUTOQ.fast >= 5 && now > AUTOQ.upLock) {     // ten seconds near 60 fps
+      AUTOQ.fast = 0; AUTOQ.cool = now + 6000;
+      if (AUTOQ.scale < 0.99) { AUTOQ.scale = Math.min(1, AUTOQ.scale + 0.17); applyPR(); }
+      else if (tier < AUTOQ.ceil) { AUTOQ.upAt = now; setQuality(tier + 1, false); }
+      label();
     }
+  };
+  function basePR() { return tier === 0 ? 1 : Math.min(window.devicePixelRatio || 1, 2); }
+  function applyPR() { renderer.setPixelRatio(Math.max(0.5, basePR() * (AUTOQ.on ? AUTOQ.scale : 1))); resize(); }
+  function label() { $('qual').textContent = 'Đồ họa: ' + (AUTOQ.on ? 'Tự động (' + TIER_NAMES[tier] + (AUTOQ.scale < 0.99 ? ', ' + Math.round(AUTOQ.scale * 100) + '%' : '') + ')' : TIER_NAMES[tier]); }
+  function setQuality(t, save) {
+    tier = Math.max(0, Math.min(2, t)); if (tier === 2 && !POST.ensure()) tier = 1; hiQ = tier > 0;
+    var ms = tier === 2 ? 4096 : 2048; if (sun.shadow.mapSize.x !== ms) { sun.shadow.mapSize.set(ms, ms); if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; } }
+    sun.castShadow = hiQ; renderer.shadowMap.autoUpdate = tier === 2; renderer.shadowMap.needsUpdate = true; POST.on = tier === 2 && !!POST.composer; syncTier();
+    applyPR(); DAY.applied = -1; LODS.force = true; label();
+    if (save) { try { localStorage.setItem('lk-quality', AUTOQ.on ? 'auto' : String(tier)); } catch (e) {} }
   }
+  // the button cycles Tự động -> Nhẹ -> Cao -> Tối đa; a manual choice is kept until changed
+  $('qual').addEventListener('click', function () { if (AUTOQ.on) { AUTOQ.on = false; setQuality(0, true); } else if (tier < 2) setQuality(tier + 1, true); else { AUTOQ.on = true; AUTOQ.reset(); setQuality(1, true); } this.blur(); });
+  (function () { var q = null; try { q = localStorage.getItem('lk-quality'); } catch (e) {} var t = q === 'lo' ? 0 : q === 'hi' ? 1 : (q === null || q === 'auto') ? -1 : +q; if (!(t >= 0 && t <= 2)) { AUTOQ.on = true; AUTOQ.reset(); t = 1; } else AUTOQ.on = false; setQuality(t, false); })();
   function showHelp() {
     delete NOTES.dismissed.welcome; delete NOTES.dismissed.credits;
     notify('welcome', 'Cách điều khiển', IS_TOUCH
@@ -1582,6 +1692,73 @@
   var MK = MW / 205;
   function mx(x) { return (x + 80) * MK; } function mz(z) { return MH / 2 + z * MK; }
   function mpoly(g, pts) { g.beginPath(); pts.forEach(function (p, i) { if (i) g.lineTo(mx(p[0]), mz(p[1])); else g.moveTo(mx(p[0]), mz(p[1])); }); g.closePath(); g.fill(); }
+  // ---------- performance overlay (key P or the FPS button) and a repeatable benchmark over fixed viewpoints ----------
+  var PF = (function () {
+    var o = { on: false, anim: 0, animShown: 0, n: 0, sum: 0, max: 0, lastNow: 0, fps: 0, ms: 0, worst: 0, calls: 0, tris: 0, acc: 0 };
+    renderer.info.autoReset = false;                      // one count per frame, including the shadow pass and the post-processing passes
+    var gl = renderer.getContext(), dbg = gl.getExtension('WEBGL_debug_renderer_info'); o.gpu = dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : 'không rõ';
+    o.begin = function (now) {
+      var d = now - o.lastNow; o.lastNow = now; AUTOQ.watch(d); if (d > 0 && d < 60000) { o.n++; o.sum += d; if (d > o.max) o.max = d; o.acc += d; if (BENCH.rec) BENCH.rec(d); }
+      renderer.info.reset(); o.anim = 0;
+    };
+    o.end = function () {
+      o.calls = renderer.info.render.calls; o.tris = renderer.info.render.triangles; o.animShown = o.anim;
+      if (o.acc < 500) return;
+      o.ms = o.sum / o.n; o.fps = 1000 / o.ms; o.worst = o.max; o.n = 0; o.sum = 0; o.max = 0; o.acc = 0;
+      if (o.on) $('perftext').textContent = o.text();
+    };
+    o.res = function () { return renderer.domElement.width + '×' + renderer.domElement.height + ' (×' + (+renderer.getPixelRatio().toFixed(2)) + ')'; };
+    o.text = function () {
+      return 'FPS ' + o.fps.toFixed(0) + '   khung ' + o.ms.toFixed(1) + ' ms (xấu nhất ' + o.worst.toFixed(0) + ')\n' +
+        'Lệnh vẽ ' + o.calls + '   tam giác ' + (o.tris / 1000).toFixed(0) + 'k\n' +
+        'Đồ họa: ' + QNAME() + '   ' + o.res() + '\n' +
+        'NPC đang cử động: ' + o.animShown + (BENCH.on ? '\nĐang đo: ' + BENCH.label : '');
+    };
+    o.toggle = function (v) { o.on = v === undefined ? !o.on : v; $('perf').style.display = o.on ? 'block' : 'none'; $('fps').setAttribute('aria-pressed', o.on ? 'true' : 'false'); if (o.on) $('perftext').textContent = o.text(); };
+    $('fps').addEventListener('click', function () { o.toggle(); this.blur(); });
+    addEventListener('keydown', function (e) { if (e.code === 'KeyP' && !e.repeat && !e.ctrlKey && !e.metaKey) o.toggle(); });
+    // triangle breakdown of what the scene holds, largest first (for the console: PF.breakdown())
+    o.breakdown = function () {
+      var rows = []; scene.traverse(function (m) { if (!(m.isMesh || m.isPoints || m.isLine) || !m.geometry) return; var g = m.geometry, t = (g.index ? g.index.count : (g.attributes.position ? g.attributes.position.count : 0)) / 3, c = m.isInstancedMesh ? m.count : 1;
+        rows.push([Math.round(t * c), Math.round(t), c, (m.name || (m.material && m.material.name) || m.type).slice(0, 28), m.visible && (!m.parent || m.parent.visible) ? 1 : 0, m.frustumCulled ? 1 : 0, m.castShadow ? 1 : 0]); });
+      rows.sort(function (a, b) { return b[0] - a[0]; }); return rows;
+    };
+    return o;
+  })();
+  function QNAME() { return TIER_NAMES[tier] + (typeof AUTOQ !== 'undefined' && AUTOQ.on ? ' (Tự động)' : ''); }
+  var BENCH = (function () {
+    var o = { on: false, label: '', rec: null, cells: [], i: 0, t0: 0, res: [], saved: null };
+    var VIEWS = [['Sân tượng đài', -10, 0, Math.PI / 2, 0.05, 6], ['Mũi công viên', 32, 0, 0, 0.06, 6], ['Vỉa hè Hùng Vương', 20, -27, 0, 0.1, 5]];
+    var CONDS = [['Ngày nắng', 'day', 'clear'], ['Ngày mưa', 'day', 'rain'], ['Đêm', 'night', 'clear']];
+    function cond(c) { DAY.mode = c[1]; DAY.h = HOURS[c[1]]; DAY.applied = -1; setMode(c[1], false); WX.set(c[2], false); var t = WX.T[c[2]]; WX.cloud = t[0]; WX.rain = t[1]; WX.fog = t[2]; WX.dirty = true; }
+    o.apply = function () { if (!o.on) return; var v = o.cells[o.i].v; pos.x = v[1]; pos.z = v[2]; heading = v[3] + Math.PI; camYaw = camYawS = v[3]; camPitch = v[4]; camDist = curDist = v[5]; };
+    function start() { var c = o.cells[o.i]; if (c.t !== tier) setQuality(c.t, false); cond(c.c); o.label = TIER_NAMES[c.t] + ' · ' + c.c[0] + ' · ' + c.v[0]; o.t0 = 0; o.fr = []; o.rec = null; }
+    o.run = function (all) {
+      if (o.on) return; o.saved = { tier: tier, mode: DAY.mode, wx: WX.mode, x: pos.x, z: pos.z, yaw: camYaw, auto: typeof AUTOQ !== 'undefined' && AUTOQ.on }; if (o.saved.auto) AUTOQ.on = false;
+      o.cells = []; (all ? [0, 1, 2] : [tier]).forEach(function (t) { CONDS.forEach(function (c) { VIEWS.forEach(function (v) { o.cells.push({ t: t, c: c, v: v }); }); }); });
+      o.i = 0; o.res = []; o.on = true; window.__noAutoQ = true; start(); PF.toggle(true);
+    };
+    o.tick = function (now) {
+      if (!o.on) return; if (!o.t0) o.t0 = now;
+      var el = now - o.t0;
+      if (el > 900 && !o.rec) o.rec = function (d) { o.fr.push(d); };                       // settle first, then record frame times
+      if ((el > 3100 && o.fr.length >= 8) || (el > 14000 && o.fr.length >= 2) || el > 45000) {
+        var f = o.fr.slice().sort(function (a, b) { return a - b; }), sum = 0; f.forEach(function (d) { sum += d; }); var c = o.cells[o.i], avg = f.length ? sum / f.length : 0;
+        o.res.push({ tier: TIER_NAMES[c.t], cond: c.c[0], view: c.v[0], frames: f.length, ms: +avg.toFixed(1), fps: +(avg ? 1000 / avg : 0).toFixed(1), p95: +(f.length ? f[Math.min(f.length - 1, Math.floor(f.length * 0.95))] : 0).toFixed(1), calls: PF.calls, tris: PF.tris, npc: PF.animShown, res: PF.res() });
+        o.i++; if (o.i >= o.cells.length) finish(); else start();
+      }
+    };
+    function finish() {
+      o.on = false; o.rec = null; var sv = o.saved; setQuality(sv.tier, false); cond(['', sv.mode, sv.wx]); if (sv.mode === 'auto') setMode('auto', false); pos.x = sv.x; pos.z = sv.z; camYaw = camYawS = sv.yaw; if (sv.auto) AUTOQ.on = true; window.__noAutoQ = false;
+      var out = { when: new Date().toISOString(), ua: navigator.userAgent, gpu: PF.gpu, viewport: innerWidth + '×' + innerHeight, dpr: window.devicePixelRatio || 1, cells: o.res }; window.__benchResult = out; try { console.log('LKBENCH ' + JSON.stringify(out)); } catch (e) {}
+      var lines = o.res.map(function (r) { return r.tier + ' · ' + r.cond + ' · ' + r.view + ': ' + r.fps + ' FPS (' + r.ms + ' ms, 95%: ' + r.p95 + ' ms), ' + r.calls + ' lệnh vẽ, ' + Math.round(r.tris / 1000) + 'k tam giác, ' + r.res; });
+      lines.push('Trình duyệt: ' + navigator.userAgent); lines.push('Card đồ họa: ' + PF.gpu + ' · khung nhìn ' + out.viewport + ' · DPR ' + out.dpr);
+      delete NOTES.dismissed.bench; notify('bench', 'Kết quả đo hiệu năng', lines);
+    }
+    $('benchgo').addEventListener('click', function () { o.run(false); this.blur(); }); $('benchall').addEventListener('click', function () { o.run(true); this.blur(); });
+    return o;
+  })();
+  window.__lk = { go: function (x, z, yaw) { pos.x = x; pos.z = z; camYaw = camYawS = yaw; heading = yaw + Math.PI; }, PF: PF, BENCH: BENCH, LOAD: LOAD, HSKY: HSKY, LODS: LODS, AUTOQ: AUTOQ, setQuality: function (t) { setQuality(t, false); }, scene: scene, renderer: renderer };      // console handle for testing
   function drawMap() {
     var g = mctx; g.setTransform(MD, 0, 0, MD, 0, 0); g.clearRect(0, 0, MW, MH);
     g.strokeStyle = '#7b8189'; g.fillStyle = '#7b8189';
@@ -1648,6 +1825,7 @@
     tank: ['Xe tăng số 714', ['Xe tăng trưng bày trên đảo cỏ riêng ở phía nam mũi công viên, giữa Quốc lộ 1 và đường Hùng Vương.', 'Mô hình là lưới T-54 chung được sơn và đánh số theo ảnh; chưa xác định được chính xác biến thể của xe thật.']]
   };
   function frame(now) {
+    PF.begin(now); BENCH.apply();
     var dt = Math.min(0.05, (now - last) / 1000 || 0); last = now; clock += dt;
     var f = joy.y + (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0);
     var st = joy.x + (keys.KeyD || keys.ArrowRight ? 1 : 0) - (keys.KeyA || keys.ArrowLeft ? 1 : 0);
@@ -1664,7 +1842,7 @@
     avatar.position.x = pos.x; avatar.position.z = pos.z; avatar.position.y += (gy - avatar.position.y) * Math.min(1, dt * 14); avatar.rotation.y = heading;
     if (AV.mixer) {                                           // the clip follows the speed actually achieved, so blocked walking does not moonwalk
       if (moved > 0.4) { if (running && AV.run) setAnim(AV.run, Math.max(0.7, moved / AV.runSpeed)); else setAnim(AV.walk, Math.max(0.5, moved / AV.walkSpeed)); } else setAnim(AV.idle, 1);
-      AV.mixer.update(dt);
+      AV.mixer.update(dt); PF.anim++;
     }
     // camera: damped follow, swept collision, lift over obstacles instead of collapsing into the avatar
     var k = Math.min(1, dt * 10); tgt.x += (pos.x - tgt.x) * k; tgt.z += (pos.z - tgt.z) * k; tgt.y += (avatar.position.y + CAM.head - tgt.y) * k;
@@ -1695,13 +1873,16 @@
       if (zone) closeNote('info-' + zone, false);
       zone = z2; if (zone && !(NOTES.dismissed['info-' + zone] && Date.now() - NOTES.dismissed['info-' + zone] < COOLDOWN)) notify('info-' + zone, INFO[zone][0], INFO[zone][1]);
     }
+    FRUST_M.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse); FRUST.setFromProjectionMatrix(FRUST_M); LODS.tick(dt);
     QUEST.check();
     for (var pk = 0; pk < peds.length; pk++) peds[pk].update(dt);
-    tickLight(dt); perfWatch(now);
+    tickLight(dt);
     if (!NOTES.moved && Math.hypot(pos.x - START.x, pos.z - START.z) > 4) { NOTES.moved = true; closeNote('welcome', false); }      // the tips card steps aside once the player is walking
     /*TEST_HOOK*/
     if (!REDUCED) UNI.time.value = clock;
-    drawMap(); if (POST.on) { POST.composer.passes[0].camera = camera; POST.composer.render(dt); } else renderer.render(scene, camera);
+    if ((PF.fc = (PF.fc | 0) + 1) % 6 === 1) drawMap();              // the minimap is redrawn ten times a second at most
+    if (POST.on) { POST.composer.passes[0].camera = camera; POST.composer.render(dt); } else renderer.render(scene, camera);
+    PF.end(); BENCH.tick(now);
     if (QUEST.shot) { QUEST.shot = false; QUEST.capture(); }                // right after drawing, while the picture is still in the canvas
     requestAnimationFrame(frame);
   }
