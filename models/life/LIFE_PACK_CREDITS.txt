@@ -1,0 +1,20 @@
+# Asset credits and licences
+Keep this credit list available in the project and in its in-game credits. Downloaded models were retrieved from their public Poly Pizza GLB links.
+- **cat** — Quaternius. CC0 1.0. [Cat](https://poly.pizza/m/qKICY6xla2). Included GLB unmodified.
+- **cat_static** — madtrollstudio. CC BY 3.0. [Cat](https://poly.pizza/m/YvVobPlTlQ). Included GLB unmodified.
+- **dog** — Quaternius. CC0 1.0. [Dog](https://poly.pizza/m/2kUk0QqpCg). Included GLB unmodified.
+- **dog_shiba** — Quaternius. CC0 1.0. [Shiba Inu](https://poly.pizza/m/y4wdQpg767). Included GLB unmodified.
+- **smartphone** — smallbigsquare. CC0 1.0. [Smartphone](https://poly.pizza/m/4DRZmTs3jq). Scale/offset normalized; materials preserved.
+- **tourist_camera** — Poly by Google. CC BY 3.0. [Camera](https://poly.pizza/m/0nfSsetwy0Z). Scale/offset normalized; materials preserved.
+- **umbrella_closed** — CreativeTrio. CC0 1.0. [Closed Umbrella](https://poly.pizza/m/o0CUgpt8pm). Scale/offset normalized; materials preserved.
+- **umbrella_open** — Poly by Google. CC BY 3.0. [Open umbrella](https://poly.pizza/m/4uOho8GeU_w). Scale/offset normalized; materials preserved.
+
+Downloaded licences:
+- CC0 1.0: https://creativecommons.org/publicdomain/zero/1.0/
+- CC BY 3.0: https://creativecommons.org/licenses/by/3.0/
+For CC BY assets retain author/source/licence attribution and indicate your subsequent changes.
+
+## Custom Vietnamese props
+Ten models in models/vietnam_custom were created for this pack. You may use, modify and redistribute these original model files in your project, including commercial projects. No attribution is required for these original meshes. They are stylized interpretations, not claims of documentary accuracy. Their source generator is included.
+
+Vietnamese sign lettering was converted from DejaVu Sans Bold into geometry; no font file is redistributed. Font provenance: https://dejavu-fonts.github.io/License.html
