@@ -17,10 +17,19 @@
   #shot { bottom: 22px; right: 132px; width: 46px; height: 42px; padding: 0; font-size: 19px; border-radius: 50%; }
   .note p.done { opacity: .6; text-decoration: line-through; }
   #hud.off { visibility: hidden; pointer-events: none; }
-  #hudhide { bottom: 118px; right: 132px; width: 46px; height: 42px; padding: 0; font-size: 17px; border-radius: 50%; }
+  #hudhide { bottom: 70px; right: 132px; width: 46px; height: 42px; padding: 0; font-size: 17px; border-radius: 50%; }
   #hudshow { position: fixed; top: 10px; right: 10px; z-index: 30; width: 46px; height: 46px; border: 0; border-radius: 50%; background: rgba(18,28,38,.4); color: rgba(255,255,255,.75); font-size: 18px; cursor: pointer; display: none; }
   #ghostjoy { position: fixed; left: 0; bottom: 0; width: 190px; height: 190px; z-index: 25; display: none; touch-action: none; }
-  #evbtn { bottom: 310px; } #jrnbtn { bottom: 358px; } #evbtn.live { background: rgba(160,60,20,.85); }
+  #evbtn { bottom: 166px; }
+  #bar #setbtn { margin-left: 4px; background: rgba(255,255,255,.14); font-size: 15px; padding: 9px 11px; } #bar #setbtn[aria-expanded="true"] { background: #f2c14e; color: #17212b; }
+  #bar #setbtn .lbl { font-size: 12px; }
+  #setmenu { position: fixed; left: 10px; top: 176px; z-index: 9; display: none; flex-direction: column; gap: 6px; padding: 8px; width: 210px; box-sizing: border-box; max-height: calc(100vh - 20px); overflow-y: auto; }
+  #setmenu.open { display: flex; }
+  @media (max-width: 430px) { #bar #setbtn .lbl { display: none; } }
+  #setmenu .sethead { display: flex; align-items: center; justify-content: space-between; padding: 0 0 2px 6px; font-size: 14px; }
+  #setmenu .x { width: 44px; height: 44px; border: 0; border-radius: 10px; background: rgba(255,255,255,.14); color: #fff; font-size: 22px; cursor: pointer; }
+  #setmenu .btn { position: static; width: 100%; height: auto; min-height: 44px; border-radius: 10px; padding: 10px 12px; font-size: 13px; text-align: left; background: rgba(255,255,255,.1); }
+  #setmenu .btn small { opacity: .6; float: right; } #evbtn.live { background: rgba(160,60,20,.85); }
   #evpanel { position: fixed; right: 10px; top: 120px; z-index: 8; display: none; box-sizing: border-box; width: min(340px, calc(100vw - 20px)); padding: 13px 14px 12px; font-size: 13.5px; line-height: 1.45; background: rgba(14,22,31,.94); border: 1px solid rgba(255,255,255,.18); max-height: calc(100vh - 140px); overflow-y: auto; }
   #evpanel h2 { margin: 0 52px 6px 0; font-size: 15px; } #evpanel p { margin: 0 0 8px; } #evpanel .x { position: absolute; top: 5px; right: 5px; width: 44px; height: 44px; padding: 0; font-size: 22px; border: 0; border-radius: 10px; background: rgba(255,255,255,.16); color: #fff; cursor: pointer; }
   #evpanel label { display: flex; align-items: center; gap: 8px; margin: 0 0 6px; cursor: pointer; } #evpanel input[type=radio], #evpanel input[type=checkbox] { width: 20px; height: 20px; }
@@ -46,9 +55,9 @@
   #bar button[aria-pressed="true"] { background: #f2c14e; color: #17212b; font-weight: 700; }
   #simnote { position: fixed; top: 176px; left: 12px; font-size: 11px; padding: 3px 8px; border-radius: 8px; background: rgba(18, 28, 38, .72); display: none; pointer-events: none; max-width: calc(100vw - 40px); }
   .btn { position: fixed; right: 12px; border: 0; color: #fff; font: inherit; font-size: 13px; padding: 11px 14px; cursor: pointer; }
-  #home { bottom: 22px; } #tank { bottom: 70px; } #qual { bottom: 118px; } #help { bottom: 166px; } #wx { bottom: 214px; } #xmas { bottom: 262px; }
+  #home { bottom: 22px; } #tank { bottom: 70px; } #wx { bottom: 118px; }
   button:focus-visible { outline: 3px solid #ffe08a; outline-offset: 2px; }
-  #jumpbtn { position: fixed; left: 34px; bottom: 166px; width: 56px; height: 56px; border: 0; border-radius: 50%; background: rgba(18,28,38,.62); color: #fff; font: inherit; font-size: 13px; font-weight: 700; display: none; z-index: 5; touch-action: none; }
+  #jumpbtn { position: fixed; right: 16px; bottom: 216px; width: 60px; height: 60px; border: 0; border-radius: 50%; background: rgba(18,28,38,.62); color: #fff; font: inherit; font-size: 13px; font-weight: 700; display: none; z-index: 5; touch-action: none; }
   #joy { position: fixed; left: 22px; bottom: 26px; width: 124px; height: 124px; border-radius: 50%;
          background: rgba(18, 28, 38, .38); border: 2px solid rgba(255,255,255,.5); touch-action: none; display: none; }
   #knob { position: absolute; left: 50%; top: 50%; width: 52px; height: 52px; margin: -26px 0 0 -26px; border-radius: 50%; background: rgba(255,255,255,.85); pointer-events: none; }
@@ -67,8 +76,8 @@
     #bar { top: 58px; max-width: calc(100vw - 190px); } #simnote { top: 104px; }
     #notes { top: 108px; right: 200px; max-height: calc(100vh - 118px); }
     #joy { width: 104px; height: 104px; bottom: 14px; }
-    #title .sub { display: none; } #title { padding: 5px 10px 6px; } #title .chip { margin-top: 2px; } #shot { bottom: 104px; right: 124px; } #fps { bottom: 148px; right: 124px; } #hudhide { bottom: 192px; right: 124px; } #act { bottom: 14px; left: 42%; } #act2 { bottom: 68px; left: 42%; } #evbtn { bottom: 192px; right: 10px; width: 46px; padding: 0; height: 42px; border-radius: 50%; } #jrnbtn { bottom: 192px; right: 62px; width: 46px; padding: 0; height: 42px; border-radius: 50%; } #evbtn .lbl, #jrnbtn .lbl { display: none; } #evpanel { top: 74px; } #tour { bottom: 8px; width: min(430px, calc(100vw - 300px)); } #perf { bottom: 8px; left: 130px; }
-    #help { bottom: 148px; } #qual { bottom: 104px; } #tank { bottom: 60px; } #home { bottom: 16px; } .btn { padding: 9px 12px; } #wx { bottom: 16px; right: 124px; } #xmas { bottom: 60px; right: 124px; }
+    #title .sub { display: none; } #title { padding: 5px 10px 6px; } #title .chip { margin-top: 2px; } #shot { bottom: 16px; right: 124px; } #hudhide { bottom: 60px; right: 124px; } #act { bottom: 14px; left: 42%; } #act2 { bottom: 68px; left: 42%; } #evbtn { bottom: 148px; right: 10px; width: 46px; padding: 0; height: 42px; border-radius: 50%; } #evbtn .lbl, #bar #setbtn .lbl { display: none; } #evpanel { top: 74px; } #tour { bottom: 8px; width: min(430px, calc(100vw - 300px)); } #perf { bottom: 8px; left: 130px; } #jumpbtn { right: 182px; bottom: 14px; width: 58px; height: 58px; }
+    #tank { bottom: 60px; } #home { bottom: 16px; } .btn { padding: 9px 12px; } #wx { bottom: 104px; } #setmenu { display: none; width: 320px; } #setmenu.open { display: grid; grid-template-columns: 1fr 1fr; } #setmenu .sethead { grid-column: 1 / -1; } #setmenu .btn { padding: 8px 10px; min-height: 40px; }
   }
   #boot { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px; text-align: center;
           background: linear-gradient(#1c2f45, #0f1a27); transition: opacity .5s; }
@@ -89,18 +98,22 @@
 <div id="title" class="panel">LONG KHÁNH<span class="sub">Công viên Tượng đài Chiến thắng · Đồng Nai</span><span class="chip" id="chip" title="Giờ, thời tiết và nhiệt độ mô phỏng">10:30 · Nắng · 31°C</span></div>
 <canvas id="map"></canvas>
 <div id="bar" class="panel" role="group" aria-label="Ánh sáng">
-  <button data-mode="day" aria-pressed="true">Ngày</button><button data-mode="sunset" aria-pressed="false">Hoàng hôn</button><button data-mode="night" aria-pressed="false">Đêm</button><button data-mode="auto" aria-pressed="false">Tự động</button>
+  <button data-mode="day" aria-pressed="true">Ngày</button><button data-mode="sunset" aria-pressed="false">Hoàng hôn</button><button data-mode="night" aria-pressed="false">Đêm</button><button data-mode="auto" aria-pressed="false">Tự động</button><button id="setbtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="setmenu" aria-label="Cài đặt / Settings">⚙<span class="lbl"> Cài đặt</span></button>
+</div>
+<div id="setmenu" class="panel" role="menu" aria-label="Cài đặt / Settings"><div class="sethead"><b>Cài đặt</b><button class="x" type="button" aria-label="Đóng cài đặt">×</button></div>
+<button id="jrnbtn" class="panel btn" role="menuitem" aria-label="Sổ nhiệm vụ / Quest journal (J)">📒 Nhiệm vụ <small>J</small></button>
+<button id="xmas" class="panel btn" role="menuitem" aria-pressed="true">Noel: Bật</button>
+<button id="qual" class="panel btn" role="menuitem">Đồ họa</button>
+<button id="help" class="panel btn" role="menuitem" aria-label="Hướng dẫn và ghi công">? Trợ giúp</button>
+<button id="fps" class="panel btn" role="menuitem" aria-label="Bật tắt bảng hiệu năng" aria-pressed="false">FPS</button>
 </div>
 <div id="simnote">Mô phỏng: 10 phút = 1 ngày (không phải giờ thật)</div>
 <div id="notes" aria-live="polite"></div>
 <div id="joy"><div id="knob"></div></div>
 <button id="jumpbtn" type="button" aria-label="Nhảy / Jump">Nhảy</button>
-<button id="help" class="panel btn" aria-label="Hướng dẫn và ghi công">? Trợ giúp</button>
 <button id="shot" class="panel btn" aria-label="Chụp ảnh lưu niệm">📷</button>
-<button id="fps" class="panel btn" aria-label="Bật tắt bảng hiệu năng" aria-pressed="false">FPS</button>
 <div id="perf" class="panel" role="status" aria-live="off"><span id="perftext"></span>
 <button id="benchgo" type="button">Chạy đo mức này</button><button id="benchall" type="button">Đo cả 3 mức</button></div>
-<button id="jrnbtn" class="panel btn" aria-label="Sổ nhiệm vụ / Quest journal (J)">📒<span class="lbl"> Nhiệm vụ</span></button>
 <button id="evbtn" class="panel btn" aria-haspopup="dialog" aria-label="Sự kiện / Events">🎆<span class="lbl"> Sự kiện</span></button>
 <div id="evpanel" class="panel" role="dialog" aria-labelledby="evtitle"><button class="x" type="button" aria-label="Đóng bảng sự kiện (không dừng buổi diễn)">×</button><h2 id="evtitle">Sự kiện · Events</h2>
 <p>Buổi diễn pháo hoa giả lập trong trò chơi, không phải lịch sự kiện thật của thành phố.</p>
@@ -108,9 +121,7 @@
 <div class="btns"><button class="b go" id="evstart" type="button">Bắt đầu · Start</button><button class="b" id="evstop" type="button" disabled>Dừng · Stop</button><button class="b" id="evreplay" type="button" disabled>Xem lại · Replay</button></div>
 <p id="evstat" aria-live="polite"></p>
 <label><input type="checkbox" id="evsound"> Âm thanh (tắt sẵn)</label><label>Âm lượng <input type="range" id="evvol" min="0" max="1" step="0.05" value="0.5" style="flex:1"></label><label><input type="checkbox" id="evreduce"> Giảm hiệu ứng</label></div>
-<button id="xmas" class="panel btn" aria-pressed="true">Noel: Bật</button>
 <button id="wx" class="panel btn">Thời tiết: Nắng</button>
-<button id="qual" class="panel btn">Đồ họa</button>
 <button id="tank" class="panel btn">Tới xe tăng</button>
 <button id="home" class="panel btn">Về điểm đầu</button>
 <button id="hudhide" class="panel btn" aria-label="Ẩn giao diện / Hide HUD" title="Ẩn giao diện / Hide HUD (H)">👁</button>
@@ -1788,7 +1799,7 @@
   }
   function setMode(m, save) {
     if (!HOURS[m] && m !== 'auto') m = 'day'; DAY.mode = m;
-    Array.prototype.forEach.call($('bar').querySelectorAll('button'), function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-mode') === m ? 'true' : 'false'); });
+    Array.prototype.forEach.call($('bar').querySelectorAll('button[data-mode]'), function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-mode') === m ? 'true' : 'false'); });
     $('simnote').style.display = m === 'auto' ? 'block' : 'none';
     if (m !== 'auto' && REDUCED) DAY.h = HOURS[m];
     if (save) { try { localStorage.setItem('lk-light-mode', m); } catch (e) {} }
@@ -1805,7 +1816,7 @@
     DAY.acc2 = (DAY.acc2 || 0) + dt;
     if (Math.abs(DAY.h - DAY.applied) > 1e-4 || DAY.shadowT < 0 || DAY.acc2 > 0.5) { DAY.acc2 = 0; applyLight(DAY.h); }
   }
-  Array.prototype.forEach.call($('bar').querySelectorAll('button'), function (b) { b.addEventListener('click', function () { var m = b.getAttribute('data-mode'); if (m === 'sunset' && DAY.mode === 'sunset' && HSKY.ok) HSKY.toggle(); setMode(m, true); b.blur(); }); });
+  Array.prototype.forEach.call($('bar').querySelectorAll('button[data-mode]'), function (b) { b.addEventListener('click', function () { var m = b.getAttribute('data-mode'); if (m === 'sunset' && DAY.mode === 'sunset' && HSKY.ok) HSKY.toggle(); setMode(m, true); b.blur(); }); });
   (function () { var m = 'day'; try { m = localStorage.getItem('lk-light-mode') || 'day'; } catch (e) {} setMode(m, false); if (m !== 'auto') DAY.h = HOURS[DAY.mode]; })();
 
   // ---------- player: third person only. A visible avatar walks; the camera orbits behind it and never enters the body ----------
@@ -1880,6 +1891,18 @@
   // ---------- input ----------
   var keys = {}, joy = { x: 0, y: 0, id: null }, look = { id: null, x: 0, y: 0 };
   if (IS_TOUCH) { $('joy').style.display = 'block'; $('jumpbtn').style.display = 'block'; }
+  (function () {
+    var b = $('setbtn'), m = $('setmenu');
+    function place() { var r = $('bar').getBoundingClientRect(), br = b.getBoundingClientRect(); m.style.top = Math.round(r.bottom + 6) + 'px'; m.style.maxHeight = Math.max(120, innerHeight - r.bottom - 16) + 'px'; m.style.left = Math.round(Math.max(10, Math.min(br.left, innerWidth - m.offsetWidth - 10))) + 'px'; }
+    function set(open) { m.classList.toggle('open', open); b.setAttribute('aria-expanded', open ? 'true' : 'false'); if (open) place(); }
+    window.SETMENU = { open: function () { return m.classList.contains('open'); }, set: set };
+    b.addEventListener('click', function (e) { e.stopPropagation(); set(!m.classList.contains('open')); b.blur(); });
+    m.querySelector('.x').addEventListener('click', function () { set(false); });
+    ['help', 'jrnbtn'].forEach(function (id) { $(id).addEventListener('click', function () { set(false); }); });
+    addEventListener('pointerdown', function (e) { if (m.classList.contains('open') && !m.contains(e.target) && e.target !== b && !b.contains(e.target)) set(false); });
+    addEventListener('keydown', function (e) { if (e.key === 'Escape' && m.classList.contains('open')) { set(false); e.stopImmediatePropagation(); e.preventDefault(); } }, true);
+    addEventListener('resize', function () { if (m.classList.contains('open')) place(); });
+  })();
   $('jumpbtn').addEventListener('pointerdown', function (e) { e.preventDefault(); e.stopPropagation(); JP.want = true; });
   function onUi(e) { var t = e.target; return !!(t && t.closest && t.closest('button, a, .note')); }
   window.addEventListener('keydown', function (e) {

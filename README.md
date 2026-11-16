@@ -8,9 +8,10 @@ Created by **Mike Do X Claude**.
 
 ## Controls
 
-- Move: WASD / arrow keys, or the joystick on phones. Camera: drag. Jump: **Space**, or **Nhảy** on phones.
+- Move: WASD / arrow keys, or the joystick on phones. Camera: drag. Jump: **Space**, or the **Nhảy** button on the right on phones.
+- ⚙ **Cài đặt** (in the lighting bar at the top) holds Nhiệm vụ, Noel, Đồ họa, Trợ giúp and FPS.
 - Interact: **E** (or the yellow button). At a table with food in your bag, **F** or the blue button: *Ngồi ăn / Sit & Eat*. Press E again to stand.
-- **J** or 📒: side-quest journal. 🎆: fireworks events (Start, Stop, Replay; sound off by default). 👁 or **H**: hide the HUD (E and Space still work).
+- **J** or ⚙ → Nhiệm vụ: side-quest journal. 🎆: fireworks events (Start, Stop, Replay; sound off by default). 👁 or **H**: hide the HUD (E and Space still work).
 - Esc closes the topmost dialog; every card has × and –.
 
 ## Gameplay additions
