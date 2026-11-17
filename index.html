@@ -62,6 +62,7 @@
          background: rgba(18, 28, 38, .38); border: 2px solid rgba(255,255,255,.5); touch-action: none; display: none; }
   #knob { position: absolute; left: 50%; top: 50%; width: 52px; height: 52px; margin: -26px 0 0 -26px; border-radius: 50%; background: rgba(255,255,255,.85); pointer-events: none; }
   /* notifications: every card carries its own X */
+  .note.hasface { padding-left: 66px; min-height: 64px; } .note .face { position: absolute; left: 10px; top: 10px; width: 46px; height: 46px; border-radius: 50%; background: #fff; border: 2px solid rgba(255,255,255,.85); object-fit: cover; }
   #notes { position: fixed; top: 204px; left: 10px; right: 10px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; pointer-events: none; max-height: max(150px, calc(100vh - 520px)); overflow-y: auto; }
   .note { position: relative; box-sizing: border-box; max-width: min(460px, 100%); padding: 11px 106px 11px 13px; min-height: 52px; font-size: 13px; line-height: 1.42; pointer-events: auto; background: rgba(14, 22, 31, .9); border: 1px solid rgba(255,255,255,.16); }
   .note.err { border-color: #ff8f7a; }
@@ -160,7 +161,8 @@
     }
     return false;
   }
-  function notify(id, title, lines, kind) {              // lines: array of strings, or [text, url] pairs rendered as links
+  var NOTE_FACE = { welcome: 'smile', quest: 'smile', journal: 'smile', sqprog: 'smile', route: 'smile', reward: 'grin', questdone: 'grin', catfound: 'grin', tablefull: 'wow', seatblock: 'wow', view: 'wow' };
+  function notify(id, title, lines, kind) {              // lines: array of strings, or [text, url] pairs rendered as links; kind 'err' or an A Huy mood
     var cur = null; NOTES.open.forEach(function (n) { if (n.id === id) cur = n; });
     var el = cur ? cur.el : document.createElement('div');
     if (!cur) {
@@ -169,6 +171,10 @@
       NOTES.el.appendChild(el); NOTES.open.push({ id: id, el: el });
     }
     while (el.firstChild) el.removeChild(el.firstChild);
+    var mood = (kind && kind !== 'err') ? kind : NOTE_FACE[id];
+    if (mood) { var fi = document.createElement('img'); fi.className = 'face'; fi.alt = ''; fi.src = 'models/ahuy/face_' + mood + '.jpg'; el.appendChild(fi); el.classList.add('hasface');
+      if ((kind && kind !== 'err') || mood === 'grin') { try { AHUY.set(mood, mood === 'grin' ? 4 : 3); } catch (e) {} } }
+    else el.classList.remove('hasface');
     var b = document.createElement('b'); b.textContent = title; el.appendChild(b);
     lines.forEach(function (t) {
       var p = document.createElement('p');
@@ -1821,7 +1827,135 @@
 
   // ---------- player: third person only. A visible avatar walks; the camera orbits behind it and never enters the body ----------
   var pos = { x: 0, z: 0 }, heading = 0, camYaw = 0, camYawS = 0, camPitch = 0.32, camDist = 5, curDist = 5, lift = 0, liftOn = false;
-  var CAM = { min: 3.2, max: 8, pitchMin: -0.5, pitchMax: 1.15, head: 1.45 }, tgt = new THREE.Vector3(), clock = 0;
+  var CAM = { min: 3.2, max: 8, pitchMin: -0.5, pitchMax: 1.15, head: 1.32 }, tgt = new THREE.Vector3(), clock = 0;
+
+  // ---------- A Huy, the player character (design: Mike Do's own character sheet) ----------
+  // A chibi built from simple shapes and fixed to the bones of the walking skeleton, so every clip (walk, run, sit, jump, eat) still works.
+  // The original skin of that skeleton is hidden. The face is drawn on a canvas and changes with the situation.
+  var AHUY = (function () {
+    var o = { mood: 'smile', hold: 0, cur: '', mats: {}, built: false, K: 0.82 };
+    var MOODS = { smile: 1, grin: 1, angry: 1, wow: 1, yum: 1 };
+    o.isMood = function (m) { return !!MOODS[m]; };
+    function face(kind) {
+      return canvasTex(256, 256, function (g, w, h) {
+        g.clearRect(0, 0, w, h); g.lineCap = 'round'; g.lineJoin = 'round';
+        var EY = 140, EX = 60, ink = '#3a1d14';
+        g.fillStyle = kind === 'angry' ? 'rgba(232,88,80,.55)' : 'rgba(240,120,110,.45)';
+        [[36, 178], [220, 178]].forEach(function (c) { g.beginPath(); g.ellipse(c[0], c[1], 28, 16, 0, 0, 6.3); g.fill(); });
+        function eye(x, big) { g.fillStyle = ink; g.beginPath(); g.ellipse(x, EY, big ? 26 : 23, big ? 33 : 30, 0, 0, 6.3); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(x - 8, EY - 12, 9, 0, 6.3); g.fill(); g.beginPath(); g.arc(x + 8, EY + 9, 4, 0, 6.3); g.fill(); }
+        function brow(x, tilt, y) { g.strokeStyle = ink; g.lineWidth = 10; g.beginPath(); g.moveTo(x - 22, (y || 90) + tilt); g.quadraticCurveTo(x, (y || 90) - 9, x + 22, (y || 90) - tilt); g.stroke(); }
+        g.lineWidth = 6; g.strokeStyle = ink;
+        if (kind === 'smile' || kind === 'grin') {
+          eye(128 - EX); eye(128 + EX); brow(128 - EX, 2); brow(128 + EX, -2);
+          g.lineWidth = 8; if (kind === 'smile') { g.beginPath(); g.moveTo(96, 204); g.quadraticCurveTo(128, 230, 160, 204); g.stroke(); }
+          else { g.fillStyle = '#7a2b22'; g.beginPath(); g.moveTo(90, 198); g.quadraticCurveTo(128, 252, 166, 198); g.closePath(); g.fill(); g.stroke(); g.fillStyle = '#fff'; g.fillRect(98, 200, 60, 12); }
+        } else if (kind === 'angry') {
+          [[128 - EX, 1], [128 + EX, -1]].forEach(function (e) { g.fillStyle = ink; g.beginPath(); g.ellipse(e[0], EY + 6, 22, 21, 0, 0, 6.3); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(e[0] - 6, EY, 6, 0, 6.3); g.fill();
+            g.strokeStyle = ink; g.lineWidth = 12; g.beginPath(); g.moveTo(e[0] - 30 * e[1], EY - 46); g.lineTo(e[0] + 26 * e[1], EY - 22); g.stroke(); });
+          g.lineWidth = 8; g.beginPath(); g.moveTo(104, 222); g.quadraticCurveTo(128, 202, 152, 222); g.stroke();
+        } else if (kind === 'wow') {
+          [128 - EX, 128 + EX].forEach(function (x) { g.fillStyle = '#fff'; g.beginPath(); g.ellipse(x, EY, 27, 32, 0, 0, 6.3); g.fill(); g.lineWidth = 7; g.stroke(); g.fillStyle = ink; g.beginPath(); g.arc(x, EY + 3, 12, 0, 6.3); g.fill(); });
+          brow(128 - EX, 0, 80); brow(128 + EX, 0, 80);
+          g.fillStyle = '#7a2b22'; g.beginPath(); g.ellipse(128, 214, 18, 23, 0, 0, 6.3); g.fill(); g.lineWidth = 7; g.stroke(); g.fillStyle = '#e88a86'; g.beginPath(); g.ellipse(128, 225, 11, 8, 0, 0, 6.3); g.fill();
+        } else {                                                     // yum: eyes shut in a smile, cheeks full, crumbs
+          [128 - EX, 128 + EX].forEach(function (x) { g.lineWidth = 10; g.beginPath(); g.moveTo(x - 25, EY + 8); g.quadraticCurveTo(x, EY - 22, x + 25, EY + 8); g.stroke(); });
+          brow(128 - EX, 2, 88); brow(128 + EX, -2, 88);
+          g.lineWidth = 8; g.beginPath(); g.moveTo(94, 204); g.quadraticCurveTo(128, 230, 162, 200); g.stroke();
+          g.fillStyle = '#b8743a'; [[170, 214, 6], [184, 230, 5], [160, 234, 4]].forEach(function (c) { g.beginPath(); g.arc(c[0], c[1], c[2], 0, 6.3); g.fill(); });
+        }
+      });
+    }
+    o.set = function (m, sec) { if (!MOODS[m]) return; o.mood = m; o.hold = sec || 3; };
+    function apply(m) { if (!o.built || m === o.cur) return; o.cur = m; if (!o.faces[m]) o.faces[m] = face(m); o.faceMat.map = o.faces[m]; o.faceMat.needsUpdate = true; }
+    o.faces = {};
+    o.tick = function (dt) {
+      if (!o.built) return; o.hold = Math.max(0, o.hold - dt);
+      var m = o.hold > 0 ? o.mood : 'smile';
+      if (typeof SEATING !== 'undefined' && SEATING.eat) m = 'yum';
+      else if (o.hold <= 0 && typeof EVENTS !== 'undefined' && EVENTS.showing) m = 'wow';
+      apply(m);
+    };
+    // build: b is the loaded character (bind pose), root the avatar group
+    o.build = function (b, root) {
+      var bones = {}, P = {}, v = new THREE.Vector3(), qa = new THREE.Quaternion(), qai = new THREE.Quaternion();
+      root.updateMatrixWorld(true); root.getWorldQuaternion(qa); qai.copy(qa).invert();
+      b.traverse(function (x) { if (x.isBone) { var n = x.name.replace(/[^A-Za-z]/g, ''); bones[n] = x; x.getWorldPosition(v); root.worldToLocal(v); P[n] = v.clone(); } });
+      if (!bones.Head || !bones.Hips || !bones.UpperLegL || !bones.FootL) return false;
+      var sk = lam(0xf1c39b), shirt = lam(0xf6f5f0), shorts = lam(0x3d6db3), apron = lam(0xcc3a2f), hair = lam(0x1d1918, { roughness: 0.6 }), sandal = lam(0xd09a3c), towel = lam(0xe9ece6), line = new THREE.MeshBasicMaterial({ color: 0x2a1410, side: THREE.BackSide });
+      apron.side = THREE.DoubleSide; o.mats = { skin: sk, shirt: shirt, shorts: shorts, apron: apron, hair: hair };
+      var M = new THREE.Matrix4(), T = new THREE.Matrix4(), R = new THREE.Matrix4(), inv = new THREE.Matrix4(), S = new THREE.Vector3(1, 1, 1);
+      function grp(n) {                                   // a group on bone n whose axes are the avatar's axes (at rest) and whose units are metres
+        var bn = bones[n], g = new THREE.Group(); bn.updateMatrixWorld(true);
+        var wp = new THREE.Vector3(); bn.getWorldPosition(wp);
+        M.compose(wp, qa, S); inv.copy(bn.matrixWorld).invert(); g.matrix.multiplyMatrices(inv, M); g.matrixAutoUpdate = false; bn.add(g); return g;
+      }
+      function mesh(geo, mat, g, x, y, z) { var m = new THREE.Mesh(geo, mat); m.position.set(x || 0, y || 0, z || 0); m.castShadow = false; m.frustumCulled = false; g.add(m); FX.dyn.push(m); return m; }
+      var UP = new THREE.Vector3(0, 1, 0);
+      function seg(n, to, r1, r2, mat, f0, f1, g) {       // a tapered limb piece from bone n towards the point of bone 'to', between fractions f0 and f1
+        g = g || grp(n); var d = P[to].clone().sub(P[n]), L = d.length(); f0 = f0 || 0; f1 = f1 === undefined ? 1 : f1;
+        var m = mesh(new THREE.CylinderGeometry(r2, r1, L * (f1 - f0), 12), mat, g); m.position.copy(d).multiplyScalar((f0 + f1) / 2); m.quaternion.setFromUnitVectors(UP, d.clone().normalize()); return g;
+      }
+      function wrap(n, to, r1, r2, mat, f0, f1, th, g) {  // a curved panel hugging the front of a limb or the torso (the apron)
+        g = g || grp(n); var d = P[to].clone().sub(P[n]), L = d.length();
+        var m = mesh(new THREE.CylinderGeometry(r2, r1, L * (f1 - f0), 18, 1, true, -th / 2, th), mat, g); m.position.copy(d).multiplyScalar((f0 + f1) / 2); m.quaternion.setFromUnitVectors(UP, d.clone().normalize()); return g;
+      }
+      function ball(g, r, mat, x, y, z, sx, sy, sz) { var m = mesh(new THREE.SphereGeometry(r, 14, 10), mat, g, x, y, z); if (sx) m.scale.set(sx, sy, sz); return m; }
+      // legs, shorts, sandals
+      ['L', 'R'].forEach(function (s2) {
+        var ul = 'UpperLeg' + s2, ll = 'LowerLeg' + s2, ft = 'Foot' + s2, sg = s2 === 'L' ? 1 : -1;
+        var g = seg(ul, ll, 0.105, 0.095, shorts, 0, 0.5); seg(ul, ll, 0.062, 0.056, sk, 0.45, 1, g);
+        var g2 = seg(ll, ft, 0.056, 0.05, sk); ball(g2, 0.058, sk);
+        var gf = grp(ft), fz = 0.05;
+        ball(gf, 0.052, sk, 0, 0.06, 0.0);
+        mesh(new THREE.BoxGeometry(0.1, 0.05, 0.2), sk, gf, 0, 0.035, fz);
+        mesh(new THREE.BoxGeometry(0.115, 0.022, 0.235), sandal, gf, 0, 0.011, fz);
+        mesh(new THREE.BoxGeometry(0.118, 0.03, 0.07), sandal, gf, 0, 0.05, fz + 0.035);
+      });
+      var gh = grp('Hips'); mesh(new THREE.CylinderGeometry(0.175, 0.2, 0.2, 16), shorts, gh, 0, -0.03, 0);
+      var sk2 = mesh(new THREE.CylinderGeometry(0.2, 0.24, 0.4, 20, 1, true, -1.15, 2.3), apron, gh, 0, -0.01, 0.01);   // apron skirt, wrapped round the front
+      mesh(new THREE.CylinderGeometry(0.192, 0.192, 0.03, 18, 1, true), apron, gh, 0, 0.08, 0);       // waist tie
+      var bow = mesh(new THREE.BoxGeometry(0.11, 0.05, 0.03), apron, gh, 0, 0.08, -0.2); mesh(new THREE.BoxGeometry(0.03, 0.12, 0.02), apron, gh, 0.025, 0.02, -0.205); mesh(new THREE.BoxGeometry(0.03, 0.12, 0.02), apron, gh, -0.025, 0.02, -0.205);
+      // torso, apron bib, straps, towel
+      var ga = seg('Abdomen', 'Neck', 0.19, 0.165, shirt); wrap('Abdomen', 'Neck', 0.203, 0.18, apron, 0, 0.8, 1.9, ga);
+      var nk = P.Neck.clone().sub(P.Abdomen), top = nk.y;
+      ball(ga, 0.17, shirt, 0, top - 0.06, 0, 1.08, 0.62, 0.9);
+      [0.08, -0.08].forEach(function (x) { mesh(new THREE.BoxGeometry(0.025, 0.02, 0.3), apron, ga, x, top - 0.02, 0.0); });
+      mesh(new THREE.BoxGeometry(0.085, 0.27, 0.03), towel, ga, 0.105, top - 0.14, 0.2);             // over the left shoulder, front
+      mesh(new THREE.BoxGeometry(0.085, 0.2, 0.03), towel, ga, 0.105, top - 0.1, -0.18);              // and behind
+      mesh(new THREE.BoxGeometry(0.09, 0.03, 0.38), towel, ga, 0.105, top + 0.0, 0.01);
+      // arms
+      ['L', 'R'].forEach(function (s2) {
+        var ua = 'UpperArm' + s2, la = 'LowerArm' + s2, pa = 'Palm' + s2;
+        var g = seg(ua, la, 0.085, 0.078, shirt, 0, 0.55); ball(g, 0.085, shirt); seg(ua, la, 0.057, 0.053, sk, 0.5, 1, g);
+        var g2 = seg(la, pa, 0.053, 0.047, sk); ball(g2, 0.055, sk);
+        var gp = grp(pa); ball(gp, 0.064, sk, 0, 0, 0, 1, 1.1, 0.85);
+      });
+      // neck and head
+      seg('Neck', 'Head', 0.055, 0.05, sk);
+      var hg = grp('Head'), R0 = 0.24, cy = 0.19;
+      var head = ball(hg, R0, sk, 0, cy, 0.01, 1.02, 0.96, 1); head.geometry = new THREE.SphereGeometry(R0, 28, 20);
+      var ol = mesh(new THREE.SphereGeometry(R0, 20, 14), line, hg, 0, cy, 0.01); ol.scale.set(1.055, 1.01, 1.04);
+      [1, -1].forEach(function (sg) { ball(hg, 0.048, sk, sg * R0 * 0.98, cy - 0.01, 0.0, 0.6, 1, 0.9); });
+      o.faceMat = new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, toneMapped: false });
+      var fm = mesh(new THREE.SphereGeometry(R0 * 1.006, 28, 18, Math.PI / 2 - 0.95, 1.9, 0.98, 1.2), o.faceMat, hg, 0, cy, 0.01); fm.scale.set(1.02, 0.96, 1); fm.renderOrder = 2;
+      // hair: a cap, the back, bangs and a few tufts
+      var hc = mesh(new THREE.SphereGeometry(R0 * 1.08, 26, 14, 0, Math.PI * 2, 0, 1.2), hair, hg, 0, cy + 0.01, -0.005); hc.scale.set(1.08, 1.06, 1.06);
+      var hb = mesh(new THREE.SphereGeometry(R0 * 1.07, 22, 14, Math.PI * 0.85, Math.PI * 1.3, 0.6, 1.6), hair, hg, 0, cy, -0.01); hb.scale.set(1.06, 1.02, 1.05);
+      var hol = mesh(new THREE.SphereGeometry(R0 * 1.08, 20, 12, 0, Math.PI * 2, 0, 1.26), line, hg, 0, cy + 0.01, -0.005); hol.scale.set(1.13, 1.1, 1.11);
+      for (var i = 0; i < 9; i++) {                       // bangs: short spikes over the forehead and temples
+        var a = -1.15 + i * (2.3 / 8), th = 1.05 + Math.abs(a) * 0.12, cone = mesh(new THREE.ConeGeometry(0.055, 0.14, 6), hair, hg);
+        var dir = new THREE.Vector3(Math.sin(a) * Math.sin(th), Math.cos(th), Math.cos(a) * Math.sin(th));
+        cone.position.copy(dir).multiplyScalar(R0 * 1.1).add(new THREE.Vector3(0, cy, 0.01)); cone.quaternion.setFromUnitVectors(UP, new THREE.Vector3(dir.x * 0.5, -1, dir.z * 0.35 + 0.25).normalize());
+      }
+      [[0.05, 1, -0.02, 0.5], [-0.07, 0.9, 0.05, -0.4], [0.0, 0.95, -0.12, 0.2]].forEach(function (t) {
+        var c = mesh(new THREE.ConeGeometry(0.035, 0.11, 5), hair, hg, t[0], cy + R0 * t[1] + 0.03, t[2]); c.rotation.z = t[3];
+      });
+      [1, -1].forEach(function (sg) { var c = mesh(new THREE.ConeGeometry(0.05, 0.14, 6), hair, hg, sg * R0 * 1.0, cy + 0.06, -0.02); c.rotation.z = sg * 2.3; });
+      b.traverse(function (x) { if (x.isSkinnedMesh) x.visible = false; });
+      o.built = true; apply('smile'); return true;
+    };
+    return o;
+  })();
   var avatar = new THREE.Group(), AV = { mixer: null, idle: null, walk: null, run: null, cur: null, walkSpeed: 2.0, runSpeed: 5.2 };
   (function () {
     var stand = new THREE.Group(), body = lam(0x2f6fb0, { roughness: 0.7 });          // simple stand-in figure until the character model has loaded (still third person)
@@ -1834,8 +1968,9 @@
     new THREE.GLTFLoader().load('models/pedestrians/mQnGoME1ez.json', function (gltf) {       // reuses one of the pedestrian characters
       var b = THREE.SkeletonUtils.clone(gltf.scene), lo = 1e9, hi = -1e9, v = new THREE.Vector3(); b.updateMatrixWorld(true);
       b.traverse(function (o) { if (o.isBone) { o.getWorldPosition(v); lo = Math.min(lo, v.y); hi = Math.max(hi, v.y); } if (o.isMesh) { o.frustumCulled = false; o.castShadow = false; FX.dyn.push(o); if (o.material) { o.material = o.material.clone(); o.material.envMapIntensity = 0.5; o.material.roughness = 0.85; o.material.metalness = 0; } } });
-      if (!(hi > lo)) return; var sc = 1.72 / ((hi - lo) * 1.03); b.scale.multiplyScalar(sc); b.position.y = -lo * sc;
+      if (!(hi > lo)) return; var sc = 1.72 / ((hi - lo) * 1.03) * AHUY.K; b.scale.multiplyScalar(sc); b.position.y = -lo * sc;   // A Huy is a kid: about 1.4 m
       avatar.remove(stand); avatar.add(b); AV.mixer = new THREE.AnimationMixer(b);
+      try { AHUY.build(b, avatar); } catch (e) { b.traverse(function (x) { if (x.isSkinnedMesh) x.visible = true; }); }
       gltf.animations.forEach(function (c) { var k = /_Idle$/.test(c.name) ? 'idle' : /_Walk$/.test(c.name) ? 'walk' : /_Run$/.test(c.name) ? 'run' : /_Jump$/.test(c.name) ? 'jump' : /_Sitting$/.test(c.name) ? 'sit' : /_Clapping$/.test(c.name) ? 'clap' : null; if (k) { AV[k] = AV.mixer.clipAction(c); AV[k + 'Dur'] = c.duration; } });
       if (AV.walk) AV.walkSpeed = 2 * 2.17 * sc / AV.walkDur;                                   // ground speed at which the Walk clip's feet do not slide
       if (AV.idle) { AV.idle.play(); AV.cur = AV.idle; }
@@ -2002,6 +2137,7 @@
       ['Bồ câu: "Dove" của Poly by Google, CC BY 3.0; hình dạng giữ nguyên, chỉ đóng gói lại và đổi cỡ.', 'https://poly.pizza/m/2jmH3trzPFf', 'poly.pizza'],
       ['Xe tăng: lưới gốc T-54 của m_bergman (Marco Bergman), CC BY-NC-SA 4.0. Bản ở đây đã giảm lưới, sơn lại và thêm số 714; chỉ dùng phi thương mại và giữ cùng giấy phép. Không phải bản sao chính xác của xe trưng bày.', 'https://creativecommons.org/licenses/by-nc-sa/4.0/', 'CC BY-NC-SA 4.0'],
       ['Bầu trời ngày và hoàng hôn: ba ảnh HDRI của Poly Haven (CC0): Kloppenheim 03, Industrial Sunset, Kloppenheim 01. Bản trong trang đã thu về 2K / 1K và xoay ngang cho khớp hướng nắng. Trời đêm vẫn dựng bằng mã.', 'https://polyhaven.com/hdris', 'polyhaven.com'],
+      'Nhân vật A Huy: thiết kế của Mike Do (tranh nhân vật tạo bằng Gemini), dựng thành 3D bằng code trong trang này; ảnh mặt trong thông báo cắt từ tranh gốc.',
       'Nhà phố quanh công viên: bốn mô hình cách điệu làm riêng cho dự án này, không phải nhà thật ở Long Khánh. Biển hiệu là chữ chung; riêng biển Highlands Coffee (239 Hùng Vương) đặt theo ghim bản đồ công khai, vị trí gần đúng, mặt tiền mô phỏng.',
       'Dải phù điêu: hai ảnh do chủ dự án cung cấp (chưa rõ nguồn gốc), dùng như bản diễn giải, không phải bản sao phù điêu thật. Chữ THẦN TỐC / TÁO BẠO / BẤT NGỜ / CHẮC THẮNG ở mặt sau là bản dựng theo yêu cầu, chưa được kiểm chứng.',
       'Đèn giao thông, CSGT, pháo hoa và các nhiệm vụ phụ là phần chơi thêm, không phải hiện trạng thật của công viên.',
@@ -2547,7 +2683,7 @@
     function cancelEat() { if (!o.eat) return; if (o.eat.prop) scene.remove(o.eat.prop); o.eat = null; o.w = 0; LIFE.force = true; }
     function finishEat() {
       var e = o.eat; if (!e || e.done) return; e.done = true;                                   // consumed once, on completion only
-      var d = SAVE.d; d.inv[e.k] = Math.max(0, (d.inv[e.k] || 0) - 1); d.ate = d.ate || {}; d.ate[e.k] = (d.ate[e.k] || 0) + 1; SAVE.store();
+      AHUY.set('yum', 2.5); var d = SAVE.d; d.inv[e.k] = Math.max(0, (d.inv[e.k] || 0) - 1); d.ate = d.ate || {}; d.ate[e.k] = (d.ate[e.k] || 0) + 1; SAVE.store();
       if (e.prop) scene.remove(e.prop); o.eat = null; o.w = 0;
       var cafeT = SEAT.on && SEAT.on.table && SEAT.on.table.cafe;
       if (FOOD[e.k][2] === 'drink' && cafeT && !d.done.drink) { QUEST.mark('drink'); SAVE.reward('drink', 20, 'Bạn đã mua nước và ngồi uống ở bàn cà phê vỉa hè.'); }
@@ -2615,7 +2751,7 @@
     function progress(id) { var S = st(id); if (id === 'lk.festival_helper.v1') return S.s === 1 ? S.got + '/3 thùng' : 'mang về cho hướng dẫn viên'; if (id === 'lk.clean_park.v1') return S.s === 1 ? S.got + '/5 món rác' : 'bỏ vào thùng'; if (id === 'lk.jump_trail.v1') return Object.keys(S.c || {}).length + '/3 rào'; if (id === 'lk.coffee_delivery.v1') return S.bought ? 'mang tới hướng dẫn viên' : 'mua đồ uống'; if (id === 'lk.safe_crossing.v1') return 'chờ đèn xanh người đi bộ'; return 'đang làm'; }
     $('jrnbtn').addEventListener('click', function () { delete NOTES.dismissed.journal; journal(true); this.blur(); });
     addEventListener('keydown', function (e) { if (e.code === 'KeyJ' && !e.repeat && !LIFE.isTyping() && !LIFE.hudOff) { delete NOTES.dismissed.journal; journal(true); } });
-    function toast(id, title, lines) { delete NOTES.dismissed[id]; notify(id, title, lines); }
+    function toast(id, title, lines, mood) { delete NOTES.dismissed[id]; notify(id, title, lines, mood); }
     // pooled world props: made once, shown / hidden as quests need them
     var crateG = new THREE.BoxGeometry(0.5, 0.36, 0.4), crateM = lam(0xd23b2b, { roughness: 0.6 }), trimM = lam(0xf2c14e, { roughness: 0.5 });
     function crate(x, z) { var g = new THREE.Group(); addMesh(crateG, crateM, 0, 0.18, 0, g); addMesh(new THREE.BoxGeometry(0.52, 0.06, 0.42), trimM, 0, 0.37, 0, g); addMesh(new THREE.SphereGeometry(0.11, 10, 8), trimM, 0, 0.5, 0, g); g.position.set(x, groundH(x, z), z); g.visible = false; scene.add(g); return g; }
@@ -2695,15 +2831,15 @@
       var X = st('lk.safe_crossing.v1');
       if (X.s === 1 || X.s === 2) {
         var l = TRAFFIC.local(pos.x, pos.z), onRoad = Math.abs(l[1]) < TRAFFIC.HALF && Math.abs(l[0]) < 40, inStripes = Math.abs(l[0]) < TRAFFIC.HW + 0.6;
-        if (X.s === 1 && onRoad) { if (inStripes && TRAFFIC.pedWalk()) { X.s = 2; X.from = l[1] < 0 ? -1 : 1; } else { toast('sqprog', 'Qua đường an toàn', ['Chưa an toàn: chờ đèn hình người màu xanh và đi trong vạch kẻ. Quay lại vỉa hè để thử lại.']); X.s = 3; } }
-        else if (X.s === 2) { if (onRoad && !inStripes) { X.s = 3; toast('sqprog', 'Qua đường an toàn', ['Ra khỏi vạch kẻ giữa đường rồi. Quay lại vỉa hè để thử lại.']); } else if (!onRoad && (l[1] < 0 ? -1 : 1) !== X.from && Math.abs(l[0]) < 6) finish('lk.safe_crossing.v1'); else if (!onRoad && Math.abs(l[0]) < 6) X.s = 1; }
+        if (X.s === 1 && onRoad) { if (inStripes && TRAFFIC.pedWalk()) { X.s = 2; X.from = l[1] < 0 ? -1 : 1; } else { toast('sqprog', 'Qua đường an toàn', ['Chưa an toàn: chờ đèn hình người màu xanh và đi trong vạch kẻ. Quay lại vỉa hè để thử lại.'], 'angry'); X.s = 3; } }
+        else if (X.s === 2) { if (onRoad && !inStripes) { X.s = 3; toast('sqprog', 'Qua đường an toàn', ['Ra khỏi vạch kẻ giữa đường rồi. Quay lại vỉa hè để thử lại.'], 'angry'); } else if (!onRoad && (l[1] < 0 ? -1 : 1) !== X.from && Math.abs(l[0]) < 6) finish('lk.safe_crossing.v1'); else if (!onRoad && Math.abs(l[0]) < 6) X.s = 1; }
       } else if (X.s === 3) { var l2 = TRAFFIC.local(pos.x, pos.z); if (Math.abs(l2[1]) > TRAFFIC.HALF + 0.4) X.s = 1; }
     };
     o.ate = function () {};
     o.st = st; o.finish = finish; sync();
     return o;
   })();
-  window.__lk.EVENTS = EVENTS; window.__lk.STOREFRONTS = STOREFRONTS; window.__lk.DAY = DAY; window.__lk.nudge = function (x, z) { pos.x = x; pos.z = z; }; window.__lk.TRAFFIC = TRAFFIC; window.__lk.cars = cars; window.__lk.BIKES = BIKES; window.__lk.LIFE = LIFE; window.__lk.SEATING = SEATING; window.__lk.SIDEQ = SIDEQ; window.__lk.devResetSave = function (w) { return SAVE.devReset(w); }; window.__lk.SEAT = SEAT; window.__lk.hips = function () { var S = SEAT.on, h = null, fl = null; if (!S) return null; avatar.traverse(function (b) { if (b.isBone && b.name === 'Hips') h = b; if (b.isBone && b.name === 'FootL') fl = b; }); if (!h) return null; avatar.updateMatrixWorld(true); var v = new THREE.Vector3(), f = new THREE.Vector3(); h.getWorldPosition(v); if (fl) fl.getWorldPosition(f); return { hipAboveSeat: +(v.y - S.top).toFixed(3), offX: +(v.x - S.x).toFixed(3), offZ: +(v.z - S.z).toFixed(3), footAboveGround: +(f.y - groundH(S.x, S.z)).toFixed(3), seatTop: +S.top.toFixed(3) }; };
+  window.__lk.EVENTS = EVENTS; window.__lk.STOREFRONTS = STOREFRONTS; window.__lk.DAY = DAY; window.__lk.AHUY = AHUY; window.__lk.face = function (h) { heading = h; }; window.__lk.nudge = function (x, z) { pos.x = x; pos.z = z; }; window.__lk.TRAFFIC = TRAFFIC; window.__lk.cars = cars; window.__lk.BIKES = BIKES; window.__lk.LIFE = LIFE; window.__lk.SEATING = SEATING; window.__lk.SIDEQ = SIDEQ; window.__lk.devResetSave = function (w) { return SAVE.devReset(w); }; window.__lk.SEAT = SEAT; window.__lk.hips = function () { var S = SEAT.on, h = null, fl = null; if (!S) return null; avatar.traverse(function (b) { if (b.isBone && b.name === 'Hips') h = b; if (b.isBone && b.name === 'FootL') fl = b; }); if (!h) return null; avatar.updateMatrixWorld(true); var v = new THREE.Vector3(), f = new THREE.Vector3(); h.getWorldPosition(v); if (fl) fl.getWorldPosition(f); return { hipAboveSeat: +(v.y - S.top).toFixed(3), offX: +(v.x - S.x).toFixed(3), offZ: +(v.z - S.z).toFixed(3), footAboveGround: +(f.y - groundH(S.x, S.z)).toFixed(3), seatTop: +S.top.toFixed(3) }; };
   window.__lk.blocked = function (x, z) { for (var i = 0; i < circles.length; i++) if (Math.hypot(x - circles[i].x, z - circles[i].z) < circles[i].r + 0.39) return 'circle'; for (i = 0; i < boxes.length; i++) { var b = boxes[i], dx = x - b.x, dz = z - b.z, lx = dx * b.c - dz * b.s, lz = dx * b.s + dz * b.c; if (Math.abs(lx) < b.hw + 0.39 && Math.abs(lz) < b.hd + 0.39) return 'box'; } return false; }; window.__lk.PETS = PETS; window.__lk.SAVE = SAVE; window.__lk.QUEST = QUEST; window.__lk.pos = pos;
 
   var INFO = {
@@ -2739,7 +2875,7 @@
       if (SEAT.on && AV.sit) setAnim(AV.sit, 1);
       else if (JP.air && AV.jump) setAnim(AV.jump, AV.jumpDur / (2 * JP.V0 / JP.G) * 0.9);                   // the avatar file's own Jump clip, stretched to the air time
       else if (moved > 0.4) { if (running && AV.run) setAnim(AV.run, Math.max(0.7, moved / AV.runSpeed)); else setAnim(AV.walk, Math.max(0.5, moved / AV.walkSpeed)); } else setAnim(AV.idle, 1);
-      AV.mixer.update(dt); PF.anim++;
+      AV.mixer.update(dt); PF.anim++; AHUY.tick(dt);
       if (SEAT.on) SEATING.frame(dt);
     }
     // camera: damped follow, swept collision, lift over obstacles instead of collapsing into the avatar
