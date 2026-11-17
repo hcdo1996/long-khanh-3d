@@ -60,3 +60,7 @@ pennant are drawn by the page's own code.
 Relief textures (models/textures/relief_march.jpg, relief_celebration.jpg), added 16 Nov 2026: supplied by the project owner,
 provenance unknown, resized to 2048x512. Used as an interpretation of the relief band, not a copy of the real reliefs.
 Fireworks, traffic signals, the traffic officer's uniform and the quest props are drawn by the page's own code.
+
+A Huy (player character), added 17 Nov 2026: character design by Mike Do (character sheet generated with Gemini).
+The 3D figure is built from simple shapes by the page's own code. models/ahuy/face_*.jpg are crops of the original sheet,
+used as portraits in notifications.
